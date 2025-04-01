@@ -2,22 +2,47 @@
 
 #import pygame
 
-memory = [0]*4096
-VX= [0]*16
-stack = [16]
+
+memory = [0]*4096           # Mémoire : 4ko
+VX= [0]*16                  # Registre
+
+stack = [16]                # Pile
+SP = []                     # Pointeur de pile
+
+PC = 0x200                  #Program counter, pour passer d'instruction en instruction.
+
+
+
+Delay_timmer = [0]*8 
+Delay_sound = [0] * 8
+
+Pointer = [0] * 16          # un pointeur pour les sprintes e mémoire (0x000 -> 0x200)
+
+
+
 
 # chargement de la rom, chargeé -> stocké dans une var, convertir, envoyé en mémoire boucle : 
 
+
+
 with open("rom/IBM.ch8", "rb") as file:
-    data_rom = file.readlines()
-    print("voici votre rom :\n{}".format(data_rom))
+    data_rom = file.read()
+    #print("voici votre rom :\n{}".format(data_rom))
+    print ("ici la taille de la rom :\n {}".format(len(data_rom)))
+
+
+#affichage et sauvegarde de la rom : 
+for i in range(len(data_rom)):
+    memory[PC + i] = data_rom[i]
+    print(memory[PC + i])              #lecture de la rom faites en décimale, reconversion en hexa ??
+
+
+
+#while (true)
+"""
+ici se trouvera une boucle infini pour le fetch, decode, execute, la lecture a été faite précédement.
+Etape suivante : décoder l'hexa reçue avec l'histoire des nibbles (demi-octets)
+
+"""
+
 file.close()
-
-
-#with open("rom/IBM.ch8", "rb") as file0:
-#    data0_rom = file.readlines().hex()
-#    print("------------------------------------\nVoici maintenant la romm en hexa(test d'un deuxième affichage)\n{}".format([hex(i) for i in data0_rom]))
-#file.close()
-          
-# pas besoin de transformation en hexa au final, les valeurs lu avvec l'argument rb permet de lire le binaire tel quel donc, récup les vals qui sont déjà en hexa :)
-# Prochaine étape, sauvegarde de la data dans la mémoire memory.

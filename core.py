@@ -17,7 +17,9 @@ class CPU:
         self.VX = [0]*16
         self.stack = [0]*16
         self.Index = 0
+        
         # serviront à l'écran, le cpu en dépendera pour l'instant je n'ai pas trouver meilleure alternative
+        
         self.display = display
         self.Win_buffer = Win_buffer
 
@@ -138,10 +140,11 @@ class CPU:
                             self.display(Y_pos, X_pos)
             self.PC += 2
                       
-        print("encours de développement...")
+        print("pipeline en cours de développement...")
 
-
+"""
 coreprocess = CPU("rom/IBM.ch8", "font/chip48font.txt")
 
 coreprocess.load_font()
 coreprocess.load_rom()
+"""

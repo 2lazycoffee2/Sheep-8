@@ -20,8 +20,7 @@ class CPU:
         
         # serviront à l'écran, le cpu en dépendera pour l'instant je n'ai pas trouver meilleure alternative
         
-        self.display = display
-        self.Win_buffer = Win_buffer
+        self.Win_buffer = Win_buffer[[0 for _ in range(64)]  for _ in range(32)]
 
 
 
@@ -74,13 +73,32 @@ class CPU:
         NN = Nug3 << 4 | Nug4 #CD
         NNN = (Nug2 << 4 | Nug3) << 4 | Nug4 # BCD
 
-        print("Position : ({}, {})\nDécoupage : 1-{}, 2-{}, 3-{}".format(X,Y , N, NN, NNN))
-        # Pour plus de détail, lire la doc mais, ce découpage est nécessaire au bon fonctionnement de la console.
-       
         return Instruction, Nug1, Nug2, Nug3, Nug4, X, Y, N, NN, NNN
     
     
+    def Mapping(self, X, Y, N):
+        """
+        fonction qui servira à
+        mapper le buffer et, le
+        renvoie à la class display.
+        """
+        self.VX[0xF] = 0
+        for line in range(N):
+            Sprite_Byte = self.memory[self.Index + line]
+            for colone in range(8) : 
+                px = (Sprite_Byte >> (7 - colone) ) & 1
+                x_pos = (self.VX[X] + colone) % 64
+                y_pos = (self.VX[Y] + line) %32
 
+                if px == 1:
+                    if self.Win_buffer[y_pos][x_pos] == 1 :
+                        self.VX[0xF] = 1
+                    self.Win_buffer[y_pos][x_pos]^=1
+        return self.Win_buffer
+    
+
+    def Reset_Window_Buffer(self):
+        self.Win_buffer[[0 for _ in range(64)] for _ in range 32]
 
     def pipeline(self):
         """

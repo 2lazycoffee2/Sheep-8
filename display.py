@@ -2,43 +2,41 @@
 
 import pygame as ga
 
-class Display:
-    
-    """
-    Classe permettant de gérer l'affichage de l'écran 64x32 du CHIP-8
-    """
+ga.init()
 
-    def __init__(self):
+
+class Display:
+
+    def __init__(self) : #Win_buffer): #Window, scale, Win_buffer):
         
         """
-        Constructeur de la classe Display
+        Constructeur de la classe Display : 
         """
 
-        # Initialisation de Pygame
-        ga.init()
-
-        # Dimensions de l'écran CHIP-8
-        self.width = 64
-        self.height = 32
         self.scale = 10
+        self.height = 64
+        self.width = 32
 
-        # Création de la fenêtre
-        self.window = ga.display.set_mode((self.width * self.scale, self.height * self.scale))
+        self.Window = ga.display.set_mode((self.height*self.scale, self.width*self.scale))
 
-        self.black = (0, 0, 0)
-        self.white = (255, 255, 255)
+        self.Black =  (0, 0, 0)
+        self.White = (255, 255, 255)
 
-        self.window.fill(self.black)
-        ga.display.update()
+        #self.Win_buffer = Win_buffer
 
-    def Draw_pixel(self, Win_Buffer):
+    
+
+    def Draw_pixel(self, Win_buffer):
+      
+
         """
-        Dessine un pixel à la position (x, y)
+        Methode de dessin des pixels :
         """
-        for y in range(self.height):
-            for x in range(self.width):
-                color = self.white if Win_Buffer[y][x] == 1 else self.black
-                rect = ga.Rect(x * self.scale, y * self.scale, self.scale, self.scale)
-                ga.draw.rect(self.window, color, rect)
-
+        for i in range(self.height):
+            for j in range(self.width):
+                if Win_buffer[j][i] == 1:
+                    ga.draw.rect(self.Window, (255, 255, 255), [i*self.scale,j*self.scale, self.scale, self.scale], 0)
+         #       else : 
+        #            ga.draw.rect(self.Window, (0, 0, 0), [i*self.scale, j*self.scale, self.scale, self.scale], 0)          #pas vraiment nécessaire je pense.
         ga.display.update()
+        

@@ -5,7 +5,7 @@ class CPU:
     Classe définissant le coeur de la console : 
     """
 
-    def __init__(self, rom_file, font_file, display, Win_buffer):
+    def __init__(self, rom_file, font_file, keypad):
         """
         Constructeur de la classe CPU
         """
@@ -20,7 +20,12 @@ class CPU:
         
         # serviront à l'écran, le cpu en dépendera pour l'instant je n'ai pas trouver meilleure alternative
         
-        self.Win_buffer = Win_buffer[[0 for _ in range(64)]  for _ in range(32)]
+        self.Win_buffer =[[0 for _ in range(64)]  for _ in range(32)]
+
+        self.keypad = keypad
+
+        self.delay_timer = 0
+        self.delay_sound = 0
 
 
 
@@ -29,9 +34,26 @@ class CPU:
         Fonction de chargement de la 
         police de caractère en mémoire.
         """
-        with open(self.font, "rb") as font:
-            font_data = font.read()
-        font.close()
+        #with open(self.font, "rb") as font:
+        #    font_data = font.read()
+        #font.close()
+        font_data = [0xF0, 0x90, 0x90, 0x90, 0xF0,#// 0
+                    0x20, 0x60, 0x20, 0x20, 0x70, #// 1
+                    0xF0, 0x10, 0xF0, 0x80, 0xF0, #// 2
+                    0xF0, 0x10, 0xF0, 0x10, 0xF0, #// 3
+                    0x90, 0x90, 0xF0, 0x10, 0x10, #// 4
+                    0xF0, 0x80, 0xF0, 0x10, 0xF0, #// 5
+                    0xF0, 0x80, 0xF0, 0x90, 0xF0, #// 6
+                    0xF0, 0x10, 0x20, 0x40, 0x40, #// 7
+                    0xF0, 0x90, 0xF0, 0x90, 0xF0, #// 8
+                    0xF0, 0x90, 0xF0, 0x10, 0xF0, #// 9
+                    0xF0, 0x90, 0xF0, 0x90, 0x90, #// A
+                    0xE0, 0x90, 0xE0, 0x90, 0xE0, #// B
+                    0xF0, 0x80, 0x80, 0x80, 0xF0, #// C
+                    0xE0, 0x90, 0x90, 0x90, 0xE0, #// D
+                    0xF0, 0x80, 0xF0, 0x80, 0xF0, #// E
+                    0xF0, 0x80, 0xF0, 0x80, 0x80] #// F
+
 
         for cells in range(len(font_data)) : 
             self.memory[cells] = font_data[cells]
@@ -58,14 +80,14 @@ class CPU:
         """
         Instruction = (self.memory[self.PC] << 8) | self.memory[self.PC + 1]
 
-        # Ici, pour les demi octets (un caractère hexa) je le récupère avec un ET logique.>
-        Nug1 = (Instruction & 0xF000) >> 12             # l'exemple ici soit 0xABCD. On fa>
+        # Ici, pour les demi octets (un caractère hexa) je le récupère avec un ET logique.
+        Nug1 = (Instruction & 0xF000) >> 12             # l'exemple ici soit 0xABCD. On fait un décalage de 12 bits vers la droite pour récupérer le dernier caractère hexadécimal
         Nug2 = (Instruction & 0x0F00) >> 8
         Nug3 = (Instruction & 0x00F0) >> 4
         Nug4 = (Instruction & 0x000F)
         print("Voici mes NUGBELLS : 1-{}, 2-{}, 3-{}, 4-{}".format(Nug1, Nug2, Nug3, Nug4))
 
-        # Un exemple pour bien comprendre : supposons que j'attrape l'instruction 0xABCD (>
+        # Un exemple pour bien comprendre : supposons que j'attrape l'instruction 0xABCD, on obtient le découpage suivant :
 
         X = Nug2   #A
         Y = Nug3   #B   
@@ -82,6 +104,7 @@ class CPU:
         mapper le buffer et, le
         renvoie à la class display.
         """
+
         self.VX[0xF] = 0
         for line in range(N):
             Sprite_Byte = self.memory[self.Index + line]
@@ -94,11 +117,13 @@ class CPU:
                     if self.Win_buffer[y_pos][x_pos] == 1 :
                         self.VX[0xF] = 1
                     self.Win_buffer[y_pos][x_pos]^=1
+
         return self.Win_buffer
     
 
     def Reset_Window_Buffer(self):
-        self.Win_buffer[[0 for _ in range(64)] for _ in range 32]
+        self.Win_buffer = [[0 for _ in range(64)] for _ in range 32]
+        return self.Win_buffer
 
     def pipeline(self):
         """
@@ -112,29 +137,75 @@ class CPU:
             self.PC += 2
 
         elif Instruction == 0x00ee:
-            #initier l'écran comme une matrice 64*32px contenant des 0
+            #depop la pile, retour à l'adresse contenue dans la stack.
             self.PC = self.stack.pop()
-            #print("depop la pile, retour à l'adresse contenue dans la stack")
             self.PC +=2
 
         elif Nug1 == 0x1:
+            #saut inconditionnel, PC mis à l'adresse NNN
             self.PC = NNN
-            #print("Mise de PC à  |{}| | PROG COUNTER : {}".format(NNN, PC))
 
         elif Nug1 == 0x2:
             #appelle du sous programme. 
-            self.stack.append(self.PC)                         # le append c'est comme un push en assembleur. (cf archi ordi)
+            self.stack.append(self.PC + 2)                         # le append c'est comme un push en assembleur. (cf archi ordi)
             self.PC +=2
 
+        elif Nug1 == 0x3:
+            #saut conditionnel
+            if self.VX[X] == NN:
+                self.PC+=4
+            else :
+                self.PC+=2
+
+
+        elif Nug1 == 0x4:
+            #saut conditionnel            
+            if self.VX[X] != NNN:
+                self.PC +=4
+            else :
+                self.PC +=2
+
+        elif Nug1 == 0x5 and Nug4 == 0x0:
+            if self.VX[X] == self.VX[Y] : 
+                self.PC+=4
+            else : 
+                self.PC+=2
+
+
         elif Nug1 == 0x6:
+            #stockage de l'adresse NN dans le registre VX.
             self.VX[X] = NN
-            #print("Mise de VX à |{}| | REGISTRE : ".format(NN, VX))
             self.PC +=2
 
         elif Nug1 == 0x7:
-            self.VX[X] += NN
-            #print("Somme de |{}| et VX | REGISTRE : {}".format(NN, VX))
+            #addition sans dépassement. 
+            self.VX[X] = (self.VX[X] +NN) %256
             self.PC +=2
+
+#------------8xy_---------------
+        elif Nug1 == 0x8;
+            if Nug4 == 
+            if Nug4 == 
+            if Nug4 == 
+            if Nug4 == 
+            if Nug4 == 
+            if Nug4 == 
+            if Nug4 == 
+            
+
+
+
+
+
+
+
+
+
+
+
+             
+                           
+
 
         elif Nug1 == 0xa:
             self.Index = NNN

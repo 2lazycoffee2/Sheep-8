@@ -39,5 +39,7 @@ class Display:
             for j in range(self.width):
                 if Win_buffer[j][i] == 1:
                     ga.draw.rect(self.Window, (255, 255, 255), [i*self.scale,j*self.scale, self.scale, self.scale], 0)
+                else:
+                    ga.draw.rect(self.Window, (0, 0, 0), [i*self.scale,j*self.scale, self.scale, self.scale], 0)
         ga.display.update()
         

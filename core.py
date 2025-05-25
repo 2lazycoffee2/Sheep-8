@@ -117,12 +117,12 @@ class CPU:
                     if self.Win_buffer[y_pos][x_pos] == 1 :
                         self.VX[0xF] = 1
                     self.Win_buffer[y_pos][x_pos]^=1
-
+        print ("self.Win_buffer")
         return self.Win_buffer
     
 
     def Reset_Window_Buffer(self):
-        self.Win_buffer = [[0 for _ in range(64)] for _ in range 32]
+        self.Win_buffer = [[0 for _ in range(64)] for _ in range( 32)]
         return self.Win_buffer
 
     def pipeline(self):
@@ -183,57 +183,85 @@ class CPU:
             self.PC +=2
 
 #------------8xy_---------------
-        elif Nug1 == 0x8;
-            if Nug4 == 
-            if Nug4 == 
-            if Nug4 == 
-            if Nug4 == 
-            if Nug4 == 
-            if Nug4 == 
-            if Nug4 == 
+        elif Nug1 == 0x8: # set
+            if Nug4 == 0x0:
+                self.VX[X] = self.VX[Y]
+
+            elif Nug4 == 0x1: #or
+                self.VX[X] = (self.VX[X] | self.VX[Y])
+            
+            elif Nug4 == 0x2: #and
+                self.VX[X] = (self.VX[X] & self.VX[Y])
+
+            elif Nug4 == 0x3: #xor
+                self.VX[X] ^= self.VX[Y]
+            
+            elif Nug4 == 0x4 : #sum
+                tmp_sum = self.VX[X] + self.VX[Y]
+
+                self.VX[X] = tmp_sum % 256
+                
+                if tmp_sum > 255:
+                    self.VX[0xF] = 1
+                else :
+                    self.VX[0xF] = 0
+
+
+            elif Nug4 == 0x5 : #sub
+                tempvx = self.VX[X] 
+                tempvy = self.VX[Y] 
+                self.VX[X] = (tempvx - tempvy) % 256    #pour rester sur 8bits sinon on fait un "overflow"
+               
+                if tempvx >= tempvy : 
+                    self.VX[0xF] = 1 
+                else :
+                        self.VX[0xF] = 0                
+            
+            elif Nug4 == 0x6: #shift right
+                tempvx = self.VX[X]  
+                self.VX[X] = (tempvx >> 1) & 0xFF                    # et là on a le choix entre set vx à vy et shifté ou juste shifté vx. Selon la doc, la méthode moderne est de ne traité que vx (1990)
+                self.VX[0xF] = tempvx & 1             #ici on récupère le bit que l'on va perdre après être shifté vers la droite avec un bitwise and
+                    
             
 
+            elif Nug4 == 0x7: #reverse sub
+                self.VX[X]  = (self.VX[Y] - self.VX[X]) % 256
+
+                if self.VX[Y] >= self.VX[X]:
+                    self.VX[0xF] = 1
+                else : 
+                    self.VX[0xF] = 0
+
+            elif Nug4 == 0xe:    #left shift   
+                tempvx = self.VX[X]
+                self.VX[X] = (tempvx << 1 ) & 0xFF          #et là on shift comme dit dans la doc 
+                self.VX[0xF] = (tempvx & 0x80) >> 7         #on récup le dernier bit que l'on va perdre après le shift que l'on décale vers la droite pour que ce soit un vrai bit
+
+            self.PC +=2
+#---------------------------
 
 
-
-
-
-
-
-
-
-
-             
-                           
+        elif Nug1 == 0x9 and Nug4 == 0x0:
+                if self.VX[X] != self.VX[Y] : 
+                    self.PC +=4
+                else:
+                    self.PC+=2
 
 
         elif Nug1 == 0xa:
             self.Index = NNN
             self.PC +=2
+        
+        elif Nug1 == 0xb:                       
+            self.PC = NNN + self.VX[0]
+        
+        elif Nug1 == 0xc:       
+            self.VX[X] = rand.randint(0, 255) & NN
+            self.PC += 2
+            
 
         elif Nug1 == 0xd:
-            self.VX[0xF]=0
-            for line in range(N):
-                Spryte_Byte = self.memory[self.Index +line]
-
-                for colone in range(8):
-                    px = (Spryte_Byte >> (7 - colone)) & 1     
-                    X_pos = (self.VX[self.X] + colone) % 64
-                    Y_pos = (self.VY[self.Y] + line) % 32
-
-                    if px == 1:    
-                        self.Win_buffer[Y_pos][X_pos] ^=1
-                    
-                    if self.Win_buffer[Y_pos][X_pos] == 1:
-                            self.VX[0xF] = 1
-                            self.display(Y_pos, X_pos)
+            self.Mapping(X, Y, N)
             self.PC += 2
                       
         print("pipeline en cours de développement...")
-
-"""
-coreprocess = CPU("rom/IBM.ch8", "font/chip48font.txt")
-
-coreprocess.load_font()
-coreprocess.load_rom()
-"""

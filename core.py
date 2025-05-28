@@ -1,5 +1,5 @@
 #coding:utf-8
-
+import random as rand
 class CPU: 
     """
     Classe définissant le coeur de la console : 
@@ -263,5 +263,75 @@ class CPU:
         elif Nug1 == 0xd:
             self.Mapping(X, Y, N)
             self.PC += 2
-                      
-        print("pipeline en cours de développement...")
+        
+        elif Nug1 == 0xe and Nug3 == 0xa and Nug4 == 0x1:
+            if self.keypad[self.VX[X]] == 0:
+                self.PC+=4
+            else : 
+                self.PC+=2
+
+        elif Nug1 == 0xf :
+            if Nug3 == 0x1 and Nug4 == 0xe:
+                self.Index = (self.VX[X] + self.Index) & 0x0FFF
+                self.PC+=2
+            elif Nug3 == 0x2 and Nug4 == 0x9:
+                self.Index = self.VX[X] * 5
+                self.PC+=2
+
+            elif Nug3 == 0x3 and Nug4 == 0x3:                           
+                """
+                ici, on utilisera la division entière, très pratique pour 
+                récupérer les valeurs dizaines et centaines, exemple :
+                123 // 100 = 1
+                """
+                print("FX33 INSTRUCTION / HERE WE HAVE VX VALUE : ", self.VX[X])
+                
+                decX = int(self.VX[X])
+                
+                self.memory[self.Index]     = self.VX[X] // 100
+                
+                print("HERE MEMORY IN I :", self.memory[self.Index]) 
+                
+                self.memory[self.Index + 1] = (self.VX[X] // 10 )%10 
+                
+                print("HERE MEMORY IN I + 1 :", self.memory[self.Index + 1])
+                
+                self.memory[self.Index + 2] = self.VX[X]% 10
+                
+                print("HERE MEMORY IN I + 2 :", self.memory[self.Index + 2 ])
+                
+                self.PC += 2   
+
+            elif Nug3 == 0x0 and Nug4 == 0x7:
+                self.VX[X] = self.delay_timer
+                self.PC+=2
+            elif Nug3 == 0x1 and Nug4 == 0x5:
+                self.delay_timer = self.VX[X]     
+                self.PC+=2
+            elif Nug3 == 0x1 and Nug4 == 0x8:
+                self.delay_sound = self.VX[X]
+
+            elif Nug3 == 0x5 and Nug4 == 5:
+                    #if X == 0:
+                    #    self.memory[self.Index] = self.VX[0]
+                    #else :
+                    for i in range(X + 1):
+                        self.memory[self.Index + i] = self.VX[i ] 
+                    self.PC+=2
+            elif Nug3 == 0x6 and Nug4 == 0x5:             
+                #if X == 0:
+                #        self.VX[0] = self.memory[self.Index] 
+                #else :
+                for i in range(X + 1):
+                    self.VX[i] = self.memory[self.Index + i]                    
+                self.PC+= 2 
+            elif Nug4 == 0xa :
+                key_is_pressed = False
+                for i in range(16):
+                    if self.keypad[i]:
+                        self.VX[X] = i
+                        key_is_pressed = True
+                        break
+                if not key_is_pressed:
+                    return
+                self.PC+=2

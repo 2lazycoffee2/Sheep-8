@@ -4,7 +4,7 @@
 
 import core as Co
 
-coreprocess = Co.CPU("rom/IBM.ch8", "font/chip48font.txt")
+coreprocess = Co.CPU("rom/IBM.ch8")#, "font/chip48font.txt")
 
 coreprocess.load_font()
 coreprocess.load_rom()

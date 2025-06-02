@@ -7,9 +7,6 @@ import input as controller
 import pygame as ga
 
 
-coreprocess.decode()
-coreprocess.pipeline()
-
 
 input0 = controller.Input()
 file = input("path of your file (don't forgot the .ch8 at the end ! ) : ")
@@ -20,7 +17,7 @@ coreprocess.load_font()
 coreprocess.load_rom()
 
 #monitor = disp.Display()
-#beep = ga.mixer.Sound('sound/beep.wav')
+beep = ga.mixer.Sound('sound/beep.wav')
 beep_channel = ga.mixer.Channel(0)
 
 # LOOP :

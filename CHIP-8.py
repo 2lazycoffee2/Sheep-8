@@ -11,7 +11,7 @@ import pygame as ga
 input0 = controller.Input()
 file = input("path of your file (don't forgot the .ch8 at the end ! ) : ")
 file = str(file)
-coreprocess = co.CPU("rom/IBM.ch8", "font/chip48font.txt")
+coreprocess = co.CPU("rom/IBM.ch8", "font/chip48font.txt", input0.keypad)
 
 coreprocess.load_font()
 coreprocess.load_rom()

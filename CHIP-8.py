@@ -32,10 +32,10 @@ while True:
     coreprocess.pipeline()                                                     #pipeline fonctionnelle
     if coreprocess.delay_timer > 0:
         coreprocess.delay_timer -=1
-    if coreprocess.sound_timer > 0:
+    if coreprocess.delay_sound > 0:
         if not beep_channel.get_busy():
             beep_channel.play(beep)
-        coreprocess.sound_timer -= 1
+        coreprocess.delay_timer -= 1
     else:
         beep_channel.stop()
     #monitor.Draw_pixel(coreprocess.Win_buffer)

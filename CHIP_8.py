@@ -12,6 +12,7 @@ def run(rom_path):
     """
     ga.init()
     ga.display.set_caption("Sheep 8")
+    ga.display.set_icon(ga.image.load("iconpng256px.png"))
     ga.mixer.init()
 
     input0 = controller.Input()

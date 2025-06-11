@@ -19,6 +19,7 @@ class UI:
         self.emulation_thread = None
         self.is_running = False #Statut de l'émulation
         self.rom_listbox = None
+        self.stop_event = threading.Event()  # Ajout de l'événement d'arrêt
         self.create_rom_listbox()
 
     def create_menu(self):
@@ -29,27 +30,37 @@ class UI:
         #Bouton Fichier
         menubar= tk.Menu(self.root)
         file_menu = tk.Menu(menubar, tearoff=0)
-        file_menu.add_command(label="Ouvrir ROM", command=self.open_file)
-        file_menu.add_command(label="Ouvrir dossier", command=self.open_folder)
+        file_menu.add_command(label="Ouvrir ROM", command=self.open_file, accelerator="Ctrl+O")
+        self.root.bind('<Control-o>', lambda event: self.open_file())
+        file_menu.add_command(label="Ouvrir dossier", command=self.open_folder, accelerator="Ctrl+Shift+O")
+        self.root.bind('<Control-Shift-o>', lambda event: self.open_folder())
         file_menu.add_separator()
-        file_menu.add_command(label="Quitter", command=self.root.quit)
+        file_menu.add_command(label="Quitter", command=self.root.quit, accelerator="Ctrl+Q")
+        self.root.bind('<Control-q>', lambda event: self.root.quit())
         menubar.add_cascade(label="Fichier", menu=file_menu)
 
         #Bouton Contrôle
         control_menu = tk.Menu(menubar, tearoff=0)
-        control_menu.add_command(label="Démarrer", command=self.play_emulation)
-        control_menu.add_command(label="Arrêter", command=self.stop_emulation)
+        control_menu.add_command(label="Démarrer", command=self.play_emulation, accelerator="F5")
+        self.root.bind('<F5>', lambda event: self.play_emulation())
+        control_menu.add_command(label="Arrêter", command=self.stop_emulation, accelerator="F6")
+        self.root.bind('<F6>', lambda event: self.stop_emulation())
+        control_menu.add_command(label="Réinitialiser", command=self.reset_emulation, accelerator="F7")
+        self.root.bind('<F7>', lambda event: self.reset_emulation())
         menubar.add_cascade(label="Contrôle", menu=control_menu)
 
         #Bouton Options
         settings_menu = tk.Menu(menubar, tearoff=0)
-        settings_menu.add_command(label="Préférences", command=self.show_settings)
+        settings_menu.add_command(label="Préférences", command=self.show_settings, accelerator="Ctrl+P")
+        self.root.bind('<Control-p>', lambda event: self.show_settings())
         menubar.add_cascade(label="Options", menu=settings_menu)
 
         #Bouton Aide
         help_menu = tk.Menu(menubar, tearoff=0)
-        help_menu.add_command(label="Aide", command=self.show_help)
-        help_menu.add_command(label="À propos", command=self.show_about)
+        help_menu.add_command(label="Aide", command=self.show_help, accelerator="F1")
+        self.root.bind('<F1>', lambda event: self.show_help())
+        help_menu.add_command(label="À propos", command=self.show_about, accelerator="F2")
+        self.root.bind('<F2>', lambda event: self.show_about())
         menubar.add_cascade(label="Aide", menu=help_menu)
 
         self.root.config(menu=menubar)
@@ -117,7 +128,8 @@ class UI:
             return
         if not self.is_running:
             self.is_running = True
-            self.emulation_thread = threading.Thread(target=self.run_emulator) #On ouvre un thread afin que l'interface réponde toujours
+            self.stop_event.clear() 
+            self.emulation_thread = threading.Thread(target=self.run_emulator)
             self.emulation_thread.start()
 
     def stop_emulation(self):
@@ -126,7 +138,27 @@ class UI:
         """
         if self.is_running:
             self.is_running = False
+            self.stop_event.set()  
+            if self.emulation_thread is not None:
+                self.emulation_thread.join()
             messagebox.showinfo("Information", "L'émulation a été arrêtée. Fermez la fenêtre de jeu si nécessaire.")
+
+    def reset_emulation(self):
+        """
+        Réinitialisation de l'émulation
+        """
+        if not self.rom_path:
+            messagebox.showwarning("Avertissement", "Aucune ROM sélectionnée. Impossible de réinitialiser l'émulation.")
+            return
+        if self.is_running:
+            self.is_running = False
+            self.stop_event.set()  
+            if self.emulation_thread is not None:
+                self.emulation_thread.join()  
+        self.stop_event.clear()
+        self.is_running = True
+        self.emulation_thread = threading.Thread(target=self.run_emulator)
+        self.emulation_thread.start()
 
     def show_settings(self):
         """
@@ -156,10 +188,11 @@ class UI:
         """
         Exécution de l'émulateur
         """
-        C8.run(self.rom_path)
+        C8.run(self.rom_path, self.stop_event)
+        self.is_running = False # Quand la fenêtre de jeu se ferme, le statut de l'émulation est mis à jour
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.iconbitmap("icon.ico")
+    root.iconbitmap("assets/icon/icon.ico")
     ui = UI(root)
     root.mainloop()

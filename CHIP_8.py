@@ -6,13 +6,13 @@ import core as co
 import input as controller
 import sys
 
-def run(rom_path):
+def run(rom_path, stop_event=None):
     """
     Fonction principale pour lancer l'émulateur CHIP-8.
     """
     ga.init()
     ga.display.set_caption("Sheep 8")
-    ga.display.set_icon(ga.image.load("iconpng256px.png"))
+    ga.display.set_icon(ga.image.load("assets/icon/sheep-256.png"))
     ga.mixer.init()
 
     input0 = controller.Input()
@@ -29,11 +29,11 @@ def run(rom_path):
 
     running = True
     while running:
+        if stop_event is not None and stop_event.is_set():
+            running = False
         events = ga.event.get()
         for event in events:
             if event.type == ga.QUIT:
-                ga.quit()
-                sys.exit()
                 running = False
 
         input0.update(events)
@@ -50,4 +50,7 @@ def run(rom_path):
             beep_channel.stop()
         monitor.Draw_pixel(coreprocess.Win_buffer)
         ga.time.Clock().tick(-30)
+    
+    ga.quit()
+    return
 

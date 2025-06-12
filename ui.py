@@ -20,7 +20,15 @@ class UI:
         self.is_running = False #Statut de l'émulation
         self.rom_listbox = None
         self.stop_event = threading.Event()  # Ajout de l'événement d'arrêt
+        self.loaded_folders = [] #Liste des dossiers chargés précédemment
+        self.load_folders_history()
         self.create_rom_listbox()
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
+        # Charger les ROMs de tous les dossiers précédemment ouverts
+        for folder in self.loaded_folders:
+            if os.path.isdir(folder):
+                self.rom_list += [os.path.join(folder, f) for f in os.listdir(folder) if f.lower().endswith(('.ch8'))]
+        self.update_rom_listbox()
 
     def create_menu(self):
         """
@@ -33,7 +41,7 @@ class UI:
         file_menu.add_command(label="Ouvrir ROM", command=self.open_file, accelerator="Ctrl+O")
         self.root.bind('<Control-o>', lambda event: self.open_file())
         file_menu.add_command(label="Ouvrir dossier", command=self.open_folder, accelerator="Ctrl+Shift+O")
-        self.root.bind('<Control-Shift-o>', lambda event: self.open_folder())
+        self.root.bind('<Control-Shift-O>', lambda event: self.open_folder())
         file_menu.add_separator()
         file_menu.add_command(label="Quitter", command=self.root.quit, accelerator="Ctrl+Q")
         self.root.bind('<Control-q>', lambda event: self.root.quit())
@@ -93,9 +101,12 @@ class UI:
         """
         folder = filedialog.askdirectory(title="Choisir le dossier des ROMs")
         if folder:
-            self.rom_list = [os.path.join(folder, f) for f in os.listdir(folder) if f.lower().endswith(('.ch8'))] #Détection des fichiers ch8
-            self.update_rom_listbox()
-            if not self.rom_list:
+            if folder not in self.loaded_folders:
+                self.loaded_folders.append(folder) #Ajout du dossier à la liste des dossiers chargés
+            self.save_folders_history()
+            self.rom_list += [os.path.join(folder, f) for f in os.listdir(folder) if f.lower().endswith(('.ch8'))] #Ajout des ROMs du dossier à la liste
+            self.update_rom_listbox()   #Mise à jour de la liste des ROMs
+            if not any(f.lower().endswith('.ch8') for f in os.listdir(folder)):
                 messagebox.showinfo("Avertissement", "Aucune ROM .ch8 trouvée dans le dossier sélectionné. Vérifiez le dossier sélectionné ou son contenu.")
 
     def update_rom_listbox(self):
@@ -103,8 +114,16 @@ class UI:
         Mise à jour de la liste des ROMs dans la Listbox
         """
         self.rom_listbox.delete(0, tk.END) #Effacement de la liste actuelle
+        # Supprimer les doublons tout en conservant l'ordre
+        seen = set()
+        unique_roms = []
         for rom in self.rom_list:
+            if rom not in seen:
+                unique_roms.append(rom)
+                seen.add(rom)
+        for rom in unique_roms:
             self.rom_listbox.insert(tk.END, os.path.basename(rom)) #Ajout des ROMs à la liste
+        self.rom_list = unique_roms
     
     def on_rom_double_click(self, event):
         """
@@ -190,6 +209,32 @@ class UI:
         """
         C8.run(self.rom_path, self.stop_event)
         self.is_running = False # Quand la fenêtre de jeu se ferme, le statut de l'émulation est mis à jour
+
+    def save_folders_history(self):
+        """
+        Sauvegarde de l'historique des dossiers chargés dans le fichier de config
+        """
+        try:
+            with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+                json.dump({'folders': self.loaded_folders}, f)
+        except Exception as e:
+            messagebox.showerror("Erreur", f"Erreur lors de la sauvegarde des dossiers: {e}")
+
+    def load_folders_history(self):
+        """
+        Chargement de l'historique des dossiers à partir du fichier de config
+        """
+        try:
+            if os.path.exists(CONFIG_FILE):
+                with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    self.loaded_folders = data.get('folders', [])
+        except Exception as e:
+            messagebox.showerror("Erreur", f"Erreur lors du chargement des dossiers: {e}")
+
+    def on_close(self):
+        self.save_folders_history()
+        self.root.destroy()
 
 if __name__ == "__main__":
     root = tk.Tk()

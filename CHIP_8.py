@@ -35,6 +35,13 @@ def run(rom_path, stop_event=None):
         for event in events:
             if event.type == ga.QUIT:
                 running = False
+            elif event.type == ga.KEYDOWN:
+                if event.key == ga.K_F6:  # Arrêter
+                    if stop_event is not None:
+                        stop_event.set()
+                elif event.key == ga.K_F7:  # Reset
+                    if stop_event is not None:
+                        stop_event.set()
 
         input0.update(events)
 
@@ -49,7 +56,7 @@ def run(rom_path, stop_event=None):
         else:
             beep_channel.stop()
         monitor.Draw_pixel(coreprocess.Win_buffer)
-        ga.time.Clock().tick(-30)
+        ga.time.Clock().tick(60)
     
     ga.quit()
     return

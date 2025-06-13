@@ -25,5 +25,7 @@
     "menu_help": "Help",
     "name": "Name",
     "size": "Size",
-    "size_unit": "B"
+    "size_unit": "B",
+    "github": "GitHub Repository",
+    "language": "Language"
 }

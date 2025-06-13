@@ -25,5 +25,7 @@
     "menu_help": "Aide",
     "name": "Nom",
     "size": "Taille",
-    "size_unit": "o"
+    "size_unit": "o",
+    "github": "Dépôt GitHub",
+    "language": "Langue"
 }

@@ -5,6 +5,7 @@ from tkinter import filedialog, messagebox, ttk
 import threading
 import json
 import os
+import sys
 import CHIP_8 as C8
 
 CONFIG_FILE = "config.json"
@@ -97,7 +98,7 @@ class UI:
         lang_menu = tk.Menu(settings_menu, tearoff=0)
         lang_menu.add_command(label="Français", command=lambda: self.set_language('fr'))
         lang_menu.add_command(label="English", command=lambda: self.set_language('en'))
-        settings_menu.add_cascade(label="Langue / Language", menu=lang_menu)
+        settings_menu.add_cascade(label=t['language'], menu=lang_menu)
         menubar.add_cascade(label=t['menu_options'], menu=settings_menu)
 
         #Bouton Aide
@@ -106,6 +107,7 @@ class UI:
         self.root.bind('<F1>', lambda event: self.show_help())
         help_menu.add_command(label=t['about'], command=self.show_about, accelerator="F2")
         self.root.bind('<F2>', lambda event: self.show_about())
+        help_menu.add_command(label=t['github'], command=lambda: os.startfile("https://github.com/2LazyCoffee2/Python_Project"))
         menubar.add_cascade(label=t['menu_help'], menu=help_menu)
 
         self.root.config(menu=menubar)
@@ -128,6 +130,7 @@ class UI:
         self.rom_listbox.column('size', width=100, anchor='w')
         self.rom_listbox.pack(fill=tk.BOTH, expand=True) #Ajustement de la taille de la liste à la fenêtre
         self.rom_listbox.bind('<Double-1>', self.on_rom_double_click) #Double-clic pour charger la ROM
+        self.rom_listbox.bind('<Return>', self.on_rom_double_click) #Appui sur Entrée pour charger la ROM
         self.update_rom_listbox()
 
     def open_file(self):
@@ -322,6 +325,9 @@ class UI:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    root.iconbitmap("assets/icon/icon.ico")
+    if sys.platform.startswith('win'):
+        root.iconbitmap("assets/icon/icon.ico")
+    else:
+        root.iconphoto(True, tk.PhotoImage(file="assets/icon/sheep-256.png"))
     ui = UI(root)
     root.mainloop()

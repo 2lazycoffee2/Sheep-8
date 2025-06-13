@@ -117,7 +117,7 @@ class CPU:
                     if self.Win_buffer[y_pos][x_pos] == 1 :
                         self.VX[0xF] = 1
                     self.Win_buffer[y_pos][x_pos]^=1
-        print ("self.Win_buffer")
+        #print ("self.Win_buffer")
         return self.Win_buffer
     
 

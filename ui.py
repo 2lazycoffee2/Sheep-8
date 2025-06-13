@@ -1,7 +1,7 @@
 #coding:utf8
 
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 import threading
 import json
 import os
@@ -60,7 +60,7 @@ class UI:
         if lang not in self.translations:
             self.translations[lang] = self.load_translations(lang)
         self.create_menu()
-        self.update_rom_listbox()
+        self.create_rom_listbox()  # Recrée la listbox pour mettre à jour les headers
 
     def create_menu(self):
         """
@@ -114,9 +114,21 @@ class UI:
         """
         Création de la liste des ROMs
         """
-        self.rom_listbox = tk.Listbox(self.root, width=50)
+        t = self.translations[self.language]
+        columns = ('name', 'size')
+        # Si la listbox existe déjà, on la détruit pour la recréer avec les bons headers
+        if self.rom_listbox is not None:
+            self.rom_listbox.destroy()
+        self.rom_listbox = ttk.Treeview(self.root, columns=columns, show='headings')
+        self.rom_listbox.heading('name', text=t.get('name', 'Nom'))
+        # Ajout de l'unité à la taille
+        size_unit = t.get('size_unit', 'o')
+        self.rom_listbox.heading('size', text=f"{t.get('size', 'Taille')} ({size_unit})")
+        self.rom_listbox.column('name', width=300, anchor='w')
+        self.rom_listbox.column('size', width=100, anchor='w')
         self.rom_listbox.pack(fill=tk.BOTH, expand=True) #Ajustement de la taille de la liste à la fenêtre
         self.rom_listbox.bind('<Double-1>', self.on_rom_double_click) #Double-clic pour charger la ROM
+        self.update_rom_listbox()
 
     def open_file(self):
         """
@@ -152,7 +164,9 @@ class UI:
         """
         Mise à jour de la liste des ROMs dans la Listbox
         """
-        self.rom_listbox.delete(0, tk.END) #Effacement de la liste actuelle
+        t=self.translations[self.language]
+        for item in self.rom_listbox.get_children(): #Effacement de la liste actuelle
+            self.rom_listbox.delete(item)
         # Supprimer les doublons tout en conservant l'ordre
         seen = set()
         unique_roms = []
@@ -160,17 +174,19 @@ class UI:
             if rom not in seen:
                 unique_roms.append(rom)
                 seen.add(rom)
+        size_unit = t['size_unit']
         for rom in unique_roms:
-            self.rom_listbox.insert(tk.END, os.path.basename(rom)) #Ajout des ROMs à la liste
+            size = os.path.getsize(rom)
+            self.rom_listbox.insert('', 'end', values=(os.path.basename(rom), f"{size} {size_unit}"))
         self.rom_list = unique_roms
     
     def on_rom_double_click(self, event):
         """
         Chargement de la ROM sélectionnée au double-clic
         """
-        selection = self.rom_listbox.curselection()
-        if selection:
-            self.rom_path = self.rom_list[selection[0]]
+        selected = self.rom_listbox.selection()
+        if selected:
+            self.rom_path = self.rom_list[self.rom_listbox.index(selected[0])]
             self.play_emulation()
 
     def play_emulation(self):

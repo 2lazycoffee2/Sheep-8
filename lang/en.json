@@ -22,5 +22,8 @@
     "menu_file": "File",
     "menu_control": "Control",
     "menu_options": "Options",
-    "menu_help": "Help"
+    "menu_help": "Help",
+    "name": "Name",
+    "size": "Size",
+    "size_unit": "B"
 }

@@ -22,5 +22,8 @@
     "menu_file": "Fichier",
     "menu_control": "Contrôle",
     "menu_options": "Options",
-    "menu_help": "Aide"
+    "menu_help": "Aide",
+    "name": "Nom",
+    "size": "Taille",
+    "size_unit": "o"
 }

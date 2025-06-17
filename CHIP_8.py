@@ -56,7 +56,7 @@ def run(rom_path, stop_event=None):
         else:
             beep_channel.stop()
         monitor.Draw_pixel(coreprocess.Win_buffer)
-        ga.time.Clock().tick(60)
+        ga.time.Clock().tick(-30)
     
     ga.quit()
     return

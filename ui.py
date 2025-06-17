@@ -103,10 +103,6 @@ class UI:
         settings_menu = tk.Menu(menubar, tearoff=0)
         settings_menu.add_command(label=t['preferences'], command=self.show_settings, accelerator="Ctrl+P")
         self.root.bind('<Control-p>', lambda event: self.show_settings())
-        lang_menu = tk.Menu(settings_menu, tearoff=0)
-        lang_menu.add_command(label="Français", command=lambda: self.set_language('fr'))
-        lang_menu.add_command(label="English", command=lambda: self.set_language('en'))
-        settings_menu.add_cascade(label=t['language'], menu=lang_menu)
         menubar.add_cascade(label=t['menu_options'], menu=settings_menu)
 
         #Bouton Aide
@@ -277,6 +273,9 @@ class UI:
 
         # Option pour activer/désactiver la toolbar
         def toggle_toolbar():
+            '''
+            Fonction pour activer/désactiver la toolbar
+            '''
             if var_toolbar.get():
                 self.toolbar_enabled = True
                 self.create_toolbar()
@@ -285,17 +284,51 @@ class UI:
                 if self.toolbar:
                     self.toolbar.destroy()
                     self.toolbar = None
-            #if debug_keypad == True:
-                #print("KEYPAD : ", core)
-        # Création de la fenêtre de paramètres
+
+        # Callback pour changement de langue
+        def on_language_change(event=None):
+            '''
+            Fonction de changement de langue
+            '''
+            # Récupère le code langue à partir du label sélectionné
+            selected_label = lang_var.get()
+            lang_code = label_to_code[selected_label]
+            if lang_code != self.language:
+                self.set_language(lang_code)
+                # Met à jour dynamiquement la fenêtre de paramètres
+                settings_win.destroy()
+                self.show_settings()
+
+        #Liste des langues disponibles (à partir des fichiers dans lang/)
+        lang_files = [f for f in os.listdir(LANG_DIR) if f.endswith('.json')]
+        available_langs = [f[:-5] for f in lang_files]
+        # Mapping code -> label traduit
+        code_to_label = {code: self.load_translations(code).get('language_name', code) for code in available_langs}
+        label_to_code = {v: k for k, v in code_to_label.items()}
+        labels = [code_to_label[code] for code in available_langs]
+        #Label courant
+        current_label = code_to_label.get(self.language, self.language)
+
+        #Création de la fenêtre de paramètres
         settings_win = tk.Toplevel(self.root)
         settings_win.title(t['settings'])
-        settings_win.geometry('300x150')
+        settings_win.geometry('350x200')
+
+        #Toolbar checkbox
         var_toolbar = tk.BooleanVar(value=self.toolbar_enabled)
-        cb = tk.Checkbutton(settings_win, text=t.get('show_toolbar', t['show_toolbar']), variable=var_toolbar, command=toggle_toolbar)
+        cb = ttk.Checkbutton(settings_win, text=t.get('show_toolbar', t['show_toolbar']), variable=var_toolbar, command=toggle_toolbar)
         cb.pack(pady=20) #Padding entre la checkbox et le haut de la fenêtre
-        tk.Label(settings_win, text=t['settings_msg']).pack(pady=10)
-        tk.Button(settings_win, text="OK", command=settings_win.destroy).pack(pady=10)
+
+        # Sélecteur de langue
+        tk.Label(settings_win, text=t['language']).pack(pady=(5,0))
+        lang_var = tk.StringVar(value=current_label)
+        lang_combo = ttk.Combobox(settings_win, textvariable=lang_var, values=labels, state="readonly")
+        lang_combo.pack(pady=5)
+        lang_combo.bind('<<ComboboxSelected>>', on_language_change)
+
+        #tk.Label(settings_win, text=t['settings_msg']).pack(pady=10)
+
+        ttk.Button(settings_win, text="OK", command=settings_win.destroy).pack(pady=10)
 
     def show_help(self):
         """

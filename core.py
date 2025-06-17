@@ -6,13 +6,12 @@ class CPU:
         Classe définissant le coeur de la console : 
         """
 
-        def __init__(self, rom_file, font_file, keypad):
+        def __init__(self, rom_file, keypad):
             
             """
             Constructeur de la classe CPU
             """
             self.rom = rom_file
-            self.font = font_file
 
             self.PC = 0x200
             self.memory = [0]*4096
@@ -33,8 +32,7 @@ class CPU:
             Fonction de chargement de la 
             police de caractère en mémoire.
             """
-            #with open(self.font, "rb") as font:
-            #    font_data = font.read()
+            
             font_data =[0xF0, 0x90, 0x90, 0x90, 0xF0, #// 0
                         0x20, 0x60, 0x20, 0x20, 0x70, #// 1
                         0xF0, 0x10, 0xF0, 0x80, 0xF0, #// 2
@@ -66,7 +64,6 @@ class CPU:
             for cells in range(len(rom_data)):
                 self.memory[self.PC + cells] = rom_data[cells]
 
-            #print(self.memory)
 
         def decode(self):
             """
@@ -83,7 +80,6 @@ class CPU:
             Nug2 = (Instruction & 0x0F00) >> 8
             Nug3 = (Instruction & 0x00F0) >> 4
             Nug4 = (Instruction & 0x000F)
-            #print("Voici mes NUGBELLS : 1-{}, 2-{}, 3-{}, 4-{}".format(Nug1, Nug2, Nug3, Nug4))
 
             # Un exemple pour bien comprendre : supposons que j'attrape l'instruction 0xABCD (
 
@@ -93,7 +89,6 @@ class CPU:
             NN = Instruction & 0x00FF#(Nug3 << 4 | Nug4) #CD
             NNN = Instruction & 0x0FFF#(Nug2 << 4 | Nug3) << 4 | Nug4 # BCD
 
-            #print("Position : ({}, {})\nDécoupage : 1-{}, 2-{}, 3-{}".format(X,Y , N, NN, NNN))
             # Pour plus de détail, lire la doc mais, ce découpage est nécessaire au bon fonctionnement de la console.
         
             return Instruction, Nug1, Nug2, Nug3, Nug4, X, Y, N, NN, NNN
@@ -106,7 +101,6 @@ class CPU:
             le buffer et le renverra à 
             la class display qui s'occupe du reste.
             """
-            #Instruction, Nug1, Nug2, Nug3, Nug4, X, Y, N, NN, NNN = self.decode()   #malheureusement, je ne peux pas spécifier que ce dont j'ai besoin...
             self.VX[0xF] = 0
 
             for line in range(N):
@@ -117,16 +111,12 @@ class CPU:
                     x_pos = (self.VX[X] + colone) % 64
                     y_pos = (self.VX[Y] + line) % 32
 
-            #px, x_pos, y_pos = self.load_sprite_px()
             
                     if px ==1 :
                         if self.Win_buffer[y_pos][x_pos] == 1 : 
                             self.VX[0xF] = 1
                         self.Win_buffer[y_pos][x_pos] ^=1 
                 
-                    
-            #print ("retour de mapping, win_buffer :\n", self.Win_buffer)
-
             return self.Win_buffer
         
         def Reset_Window_Buffer(self):
@@ -200,24 +190,19 @@ class CPU:
 
                 if Nug4 == 0x0: #set 
                     self.VX[X] = self.VX[Y]
-                    #self.PC +=2
 
                 elif Nug4 == 0x1: # or
                     self.VX[X] = (self.VX[X] | self.VX[Y])
-                    #self.PC +=2
 
                 elif Nug4 == 0x2: # and
-                    self.VX[X] = (self.VX[X] & self.VX[Y])      #pas compris dif entre bitwise and/or(&, |) et juste and/or 
-                    #self.PC +=2
+                    self.VX[X] = (self.VX[X] & self.VX[Y])      
 
                 elif Nug4 == 0x3: #xor
                     self.VX[X] ^= self.VX[Y]                
-                    #self.PC +=2
 
                 elif Nug4 == 0x4:  #sum       
                     
                     tmp_sum = self.VX[X] + self.VX[Y]
-                    #self.VX[0xF] = 0
 
                     self.VX[X] = tmp_sum % 256
                     if tmp_sum > 255:
@@ -225,7 +210,6 @@ class CPU:
                     else :
                         self.VX[0xF] = 0
 
-                    #self.PC +=2
 
                 elif Nug4 == 0x5:   #sub     
                     tempvx = self.VX[X] 
@@ -237,25 +221,22 @@ class CPU:
                         self.VX[0xF] = 1 
                     else :
                         self.VX[0xF] = 0
-                    #self.PC +=2
 
                 elif Nug4 == 0x6:   # shift right 
                     tempvx = self.VX[X]  
-                    self.VX[X] = (tempvx >> 1) & 0xFF                    # et là on a le choix entre set vx à vy et shifté ou juste shifté vx. Selon la doc, la méthode moderne est de ne traité que vx (1990)
+                    self.VX[X] = (tempvx >> 1) & 0xFF     # et là on a le choix entre set vx à vy et shifté ou juste shifté vx. Selon la doc, la méthode moderne est de ne traité que vx (1990).
 
-                    self.VX[0xF] = tempvx & 1             #ici on récupère le bit que l'on va perdre après être shifté vers la droite avec un bitwise and
+                    self.VX[0xF] = tempvx & 1             # ici on récupère le bit que l'on va perdre après être shifté vers la droite avec un bitwise and
                     
 
-                elif Nug4 == 0x7:    #sub   # 
+                elif Nug4 == 0x7:    #sub   
                     self.VX[X]  = (self.VX[Y] - self.VX[X]) % 256
 
                     if self.VX[Y] >= self.VX[X]:
                         self.VX[0xF] = 1
                     else : 
                         self.VX[0xF] = 0
-                    
-                    #self.PC +=2
-                    
+                                        
 
                 elif Nug4 == 0xe:    #left shift   
                     tempvx = self.VX[X]
@@ -263,7 +244,6 @@ class CPU:
 
                     self.VX[0xF] = (tempvx & 0x80) >> 7         #on récup le dernier bit que l'on va perdre après le shift que l'on décale vers la droite pour que ce soit un vrai bit
 
-                    #self.PC +=2
                 self.PC +=2
     #--------------------------------------------------------------------
 
@@ -295,24 +275,17 @@ class CPU:
 
     #-------------//KEY IS PRESSED OR NOT------------------#
             elif Nug1 == 0xe and Nug3 == 0x9: #ajouter la condition de skipping ssi la clé correspondandt à la valeur dans VX est pressé
-                #tempvx = self.VX[X]
                 if  self.keypad[self.VX[X]] == 1:
                     self.PC+=4
                 else :
                     self.PC+=2
               
 
-            elif Nug1 == 0xe and Nug3 == 0xa and Nug4 == 0x1: #ajouter la condition de skipping la clé n'est pas pressé 
-                #tempvx = self.VX[X]
-                print("VOICI LE KEYPAD",self.keypad)
-                
+            elif Nug1 == 0xe and Nug3 == 0xa and Nug4 == 0x1: #ajouter la condition de skipping la clé n'est pas pressé                 
                 if self.keypad[self.VX[X]] == 0:
                     self.PC+=4
                 else :
                     self.PC+=2
-
-
-
 
     #-------------------------------------------------------
 
@@ -321,38 +294,25 @@ class CPU:
                     self.Index = (self.VX[X] + self.Index) &  0x0FFF 
                     self.PC+=2
 
-                elif Nug3 == 0x2 and Nug4 == 0x9:   #FX29 à revoir
+                elif Nug3 == 0x2 and Nug4 == 0x9:   #FX29 
                     self.Index = self.VX[X] * 5
                     self.PC +=2
                 
                 elif Nug3 == 0x3 and Nug4 == 0x3:
-
-                    
                     """
                     ici, on utilisera la division entière, très pratique pour 
                     récupérer les valeurs dizaines et centaines, exemple :
                     123 // 100 = 1
                     """
-                    print("FX33 INSTRUCTION / HERE WE HAVE VX VALUE : ", self.VX[X])
                     
                     decX = int(self.VX[X])
-                    
+
                     self.memory[self.Index]     = self.VX[X] // 100
-                    
-                    print("HERE MEMORY IN I :", self.memory[self.Index]) 
-                    
-                    self.memory[self.Index + 1] = (self.VX[X] // 10 )%10 
-                    
-                    print("HERE MEMORY IN I + 1 :", self.memory[self.Index + 1])
-                    
+                    self.memory[self.Index + 1] = (self.VX[X] // 10 )%10                                         
                     self.memory[self.Index + 2] = self.VX[X]% 10
-                    
-                    print("HERE MEMORY IN I + 2 :", self.memory[self.Index + 2 ])
-                    
+                                        
                     self.PC += 2
     #------------TIMERS :--------------------------------#
-    #attentions, les opcodes ici ne sont pas terminer, rajouter la décrémentation du
-    #sound timer sinon, pas de son...
 
                 elif Nug3 == 0x0 and Nug4 == 0x7:
                     self.VX[X] = self.delay_timer
@@ -367,19 +327,15 @@ class CPU:
     #-------------- DATA STORAGE------------------------#
 
                 elif Nug3 == 0x5 and Nug4 == 5:
-                    #if X == 0:
-                    #    self.memory[self.Index] = self.VX[0]
-                    #else :
                     for i in range(X + 1):
                         self.memory[self.Index + i] = self.VX[i ] 
                     self.PC+=2
+
                 elif Nug3 == 0x6 and Nug4 == 0x5:             
-                    #if X == 0:
-                    #        self.VX[0] = self.memory[self.Index] 
-                    #else :
                     for i in range(X + 1):
                         self.VX[i] = self.memory[self.Index + i]                    
-                    self.PC+= 2 
+                    self.PC+= 2
+
                 elif Nug4 == 0xa :
                     key_is_pressed = False
                     for i in range(16):
@@ -390,9 +346,3 @@ class CPU:
                     if not key_is_pressed:
                         return
                     self.PC+=2
-
-
-            #print("encours de développement...")
-        
-
-

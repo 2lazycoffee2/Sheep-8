@@ -10,13 +10,14 @@ def run(rom_path, stop_event=None):
     """
     Fonction principale pour lancer l'émulateur CHIP-8.
     """
+
     ga.init()
     ga.display.set_caption("Sheep 8")
     ga.display.set_icon(ga.image.load("assets/icon/sheep-256.png"))
     ga.mixer.init()
 
     input0 = controller.Input()
-    coreprocess = co.CPU(rom_path, "font/chip48font.txt", input0.keypad)
+    coreprocess = co.CPU(rom_path, input0.keypad)
 
     coreprocess.load_font()
     coreprocess.load_rom()
@@ -45,8 +46,8 @@ def run(rom_path, stop_event=None):
 
         input0.update(events)
 
-        coreprocess.decode()                                                       #decode fonctionnelle
-        coreprocess.pipeline()                                                     #pipeline fonctionnelle
+        coreprocess.decode()                                                       
+        coreprocess.pipeline()                                                     
         if coreprocess.delay_timer > 0:
             coreprocess.delay_timer -=1
         if coreprocess.delay_sound > 0:

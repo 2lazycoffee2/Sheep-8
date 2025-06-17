@@ -4,19 +4,21 @@ from PIL import Image, ImageTk, ImageDraw, ImageFont
 import os
 
 class Toolbar:
-    def __init__(self, parent, get_translations, actions, theme_bg=None, font_path=None):
+    def __init__(self, parent, get_translations, actions, is_running=None, theme_bg=None, font_path=None):
         """
         Constructeur de la classe Toolbar.
 
         parent: widget parent (ici forcément la fenêtre principale)
         get_translations: fonction qui retourne le dict de traduction courant
         actions: dict { 'open_rom': callback, 'preferences': callback, 'help': callback }
+        is_running: flag qui indique l'état de l'émulation (optionnel, par défaut False)
         theme_bg: couleur de fond (optionnel)
         font_path: chemin vers la police custom (optionnel)
         """
         self.parent = parent
         self.get_translations = get_translations
         self.actions = actions
+        self.is_running = is_running or (lambda: False)
         self.theme_bg = theme_bg or parent.cget('bg')
         self.toolbar = None
         self.toolbar_images = {}
@@ -42,6 +44,13 @@ class Toolbar:
         self.toolbar_images = {}
         buttons = [
             ('open_rom', 'openfile.png', self.actions.get('open_rom')),
+        ]
+        #Affichage conditionnel des boutons play/stop
+        if not self.is_running():
+            buttons.append(('start', 'play.png', self.actions.get('start')))
+        else:
+            buttons.append(('stop', 'stop.png', self.actions.get('stop')))
+        buttons += [
             ('preferences', 'settings.png', self.actions.get('preferences')),
             ('help', 'help.png', self.actions.get('help'))
         ]
@@ -55,16 +64,10 @@ class Toolbar:
             except Exception:
                 img = None #On doit penser à un cas où l'image n'existe pas, si l'utilisateur implémente un thème personnalisé et veut le tester sans l'avoir fini
             self.toolbar_images[icon_file] = img
-            # Frame vertical pour chaque bouton (icône + label)
-            btn_frame = ttk.Frame(self.toolbar)
-            btn_frame.grid(row=0, column=idx, padx=12, pady=2, sticky='n')
-            # Bouton icône
-            btn = ttk.Button(btn_frame, image=img, command=command, style='Toolbutton')
-            btn.pack(side=tk.TOP, pady=(0,2))
-            # Label texte (police système)
             label_text = t.get(label_key, label_key)
-            lbl = ttk.Label(btn_frame, text=label_text, font=(None, 10, 'bold'))
-            lbl.pack(side=tk.TOP)
+            # Boutons ttk avec image + label
+            btn = ttk.Button(self.toolbar, image=img, text=label_text, command=command, style='Toolbutton', compound='top')
+            btn.grid(row=0, column=idx, padx=2, pady=2, sticky='n')
 
     def update(self):
         self._build_toolbar()

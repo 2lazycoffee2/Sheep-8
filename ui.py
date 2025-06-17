@@ -128,12 +128,21 @@ class UI:
         t = self.translations[self.language]
         actions = {
             'open_rom': self.open_file,
+            'start': self.play_emulation,
+            'stop': self.stop_emulation,
             'preferences': self.show_settings,
             'help': self.show_help
         }
         font_path = "assets/fonts/Address Sans Pro SemiBold.ttf"
         # Création de la toolbar avec les actions et le thème
-        self.toolbar = Toolbar(self.root, lambda: t, actions, theme_bg=self.root.cget('bg'), font_path=font_path)
+        self.toolbar = Toolbar(
+            self.root,
+            lambda: t,
+            actions,
+            is_running=lambda: self.is_running,
+            theme_bg=self.root.cget('bg'),
+            font_path=font_path
+        )
         self.toolbar.toolbar.pack_forget()
         self.toolbar.toolbar.pack(side=tk.TOP, fill=tk.X, before=self.rom_listbox if self.rom_listbox else None)
 
@@ -223,9 +232,9 @@ class UI:
         """
         t = self.translations[self.language]
         if not self.rom_path:
-            selection = self.rom_listbox.curselection()
+            selection = self.rom_listbox.selection()
             if selection:
-                self.rom_path = self.rom_list[selection[0]]
+                self.rom_path = self.rom_list[self.rom_listbox.index(selection[0])]
         if not self.rom_path:
             messagebox.showwarning(t['help'], t['warning_no_rom'])
             return
@@ -234,6 +243,8 @@ class UI:
             self.stop_event.clear()
             self.emulation_thread = threading.Thread(target=self.run_emulator)
             self.emulation_thread.start()
+        if self.toolbar:
+            self.update_toolbar()
 
     def stop_emulation(self):
         """
@@ -243,9 +254,9 @@ class UI:
         if self.is_running:
             self.is_running = False
             self.stop_event.set()
-            if self.emulation_thread is not None:
-                self.emulation_thread.join()
-            messagebox.showinfo(t['help'], t['info_stopped'])
+            #messagebox.showinfo(t['help'], t['info_stopped'])
+            if self.toolbar:
+                self.update_toolbar()
 
     def reset_emulation(self):
         """
@@ -264,6 +275,8 @@ class UI:
         self.is_running = True
         self.emulation_thread = threading.Thread(target=self.run_emulator)
         self.emulation_thread.start()
+        if self.toolbar:
+            self.update_toolbar()
 
     def show_settings(self):
         """
@@ -350,6 +363,8 @@ class UI:
         """
         C8.run(self.rom_path, self.stop_event)
         self.is_running = False # Quand la fenêtre de jeu se ferme, le statut de l'émulation est mis à jour
+        if self.toolbar:
+            self.update_toolbar()
 
     def save_folders_history(self):
         """
@@ -402,9 +417,21 @@ class UI:
         return 'fr'
 
     def on_close(self):
+        """
+        Actions à réaliser lors de la fermeture
+        """
         self.save_folders_history()
         self.save_language(self.language)
         self.root.destroy()
+
+    def update_toolbar(self):
+        """
+        Mise à jour de la toolbar
+        """
+        if self.toolbar and hasattr(self.toolbar, 'toolbar'):
+            self.toolbar.update()
+            self.toolbar.toolbar.pack_forget()
+            self.toolbar.toolbar.pack(side=tk.TOP, fill=tk.X, before=self.rom_listbox if self.rom_listbox else None)
 
 if __name__ == "__main__":
     root = tk.Tk()

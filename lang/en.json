@@ -27,5 +27,6 @@
     "size": "Size",
     "size_unit": "B",
     "github": "GitHub Repository",
-    "language": "Language"
+    "language": "Language",
+    "show_toolbar": "Show Toolbar"
 }

@@ -7,6 +7,8 @@ import json
 import os
 import sys
 import CHIP_8 as C8
+from PIL import Image, ImageTk
+from toolbar import Toolbar
 
 CONFIG_FILE = "config.json"
 LANG_DIR = "lang"
@@ -28,7 +30,11 @@ class UI:
         self.is_running = False #Statut de l'émulation
         self.rom_listbox = None
         self.stop_event = threading.Event() #Évènement d'arrêt
+        self.toolbar = None
+        self.toolbar_enabled = True  # Pour activer/désactiver la toolbar dynamiquement
         self.create_menu()
+        if self.toolbar_enabled:
+            self.create_toolbar()
         self.create_rom_listbox()
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
         # Charger les ROMs de tous les dossiers précédemment ouverts
@@ -44,7 +50,7 @@ class UI:
         try:
             with open(os.path.join(LANG_DIR, f"{lang}.json"), 'r', encoding='utf-8') as f:
                 data = json.load(f)
-            # Convert filetypes back to tuple for tkinter
+            #Conversion des types de fichiers en tuples pour la listbox
             if 'filetypes' in data:
                 data['filetypes'] = [tuple(ft) for ft in data['filetypes']]
             return data
@@ -61,7 +67,9 @@ class UI:
         if lang not in self.translations:
             self.translations[lang] = self.load_translations(lang)
         self.create_menu()
-        self.create_rom_listbox()  # Recrée la listbox pour mettre à jour les headers
+        if self.toolbar_enabled:
+            self.create_toolbar()
+        self.create_rom_listbox()  # Recréation de la listbox pour mettre à jour les headers
 
     def create_menu(self):
         """
@@ -111,6 +119,27 @@ class UI:
         menubar.add_cascade(label=t['menu_help'], menu=help_menu)
 
         self.root.config(menu=menubar)
+
+
+    def create_toolbar(self):
+        """
+        Affichage de la toolbar
+        """
+        # Détruit la toolbar si elle existe déjà
+        if hasattr(self, 'toolbar') and self.toolbar is not None:
+            self.toolbar.toolbar.pack_forget()
+            self.toolbar.destroy()
+        t = self.translations[self.language]
+        actions = {
+            'open_rom': self.open_file,
+            'preferences': self.show_settings,
+            'help': self.show_help
+        }
+        font_path = "assets/fonts/Address Sans Pro SemiBold.ttf"
+        # Création de la toolbar avec les actions et le thème
+        self.toolbar = Toolbar(self.root, lambda: t, actions, theme_bg=self.root.cget('bg'), font_path=font_path)
+        self.toolbar.toolbar.pack_forget()
+        self.toolbar.toolbar.pack(side=tk.TOP, fill=tk.X, before=self.rom_listbox if self.rom_listbox else None)
 
     def create_rom_listbox(self):
         """
@@ -245,7 +274,28 @@ class UI:
         Affichage des paramètres de l'émulateur
         """
         t = self.translations[self.language]
-        messagebox.showinfo(t['settings'], t['settings_msg'])
+
+        # Option pour activer/désactiver la toolbar
+        def toggle_toolbar():
+            if var_toolbar.get():
+                self.toolbar_enabled = True
+                self.create_toolbar()
+            else:
+                self.toolbar_enabled = False
+                if self.toolbar:
+                    self.toolbar.destroy()
+                    self.toolbar = None
+            #if debug_keypad == True:
+                #print("KEYPAD : ", core)
+        # Création de la fenêtre de paramètres
+        settings_win = tk.Toplevel(self.root)
+        settings_win.title(t['settings'])
+        settings_win.geometry('300x150')
+        var_toolbar = tk.BooleanVar(value=self.toolbar_enabled)
+        cb = tk.Checkbutton(settings_win, text=t.get('show_toolbar', t['show_toolbar']), variable=var_toolbar, command=toggle_toolbar)
+        cb.pack(pady=20) #Padding entre la checkbox et le haut de la fenêtre
+        tk.Label(settings_win, text=t['settings_msg']).pack(pady=10)
+        tk.Button(settings_win, text="OK", command=settings_win.destroy).pack(pady=10)
 
     def show_help(self):
         """

@@ -27,5 +27,6 @@
     "size": "Taille",
     "size_unit": "o",
     "github": "Dépôt GitHub",
-    "language": "Langue"
+    "language": "Langue",
+    "show_toolbar": "Afficher la barre d'outils"
 }

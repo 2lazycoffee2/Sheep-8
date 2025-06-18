@@ -6,12 +6,13 @@ class CPU:
         Classe définissant le coeur de la console : 
         """
 
-        def __init__(self, rom_file, keypad):
+        def __init__(self, rom_file, font_file, keypad):
             
             """
             Constructeur de la classe CPU
             """
             self.rom = rom_file
+            self.font = font_file
 
             self.PC = 0x200
             self.memory = [0]*4096
@@ -21,7 +22,6 @@ class CPU:
 
             self.keypad = keypad
             # serviront à l'écran, le cpu en dépendera pour l'instant je n'ai pas trouver meilleure alternative
-            #self.display = display
             self.Win_buffer = [[0 for _ in range(64)] for _ in range(32)]
 
             self.delay_timer = 0 # équivalent au 60HZ, valeur qui sera donné au cpu
@@ -32,7 +32,7 @@ class CPU:
             Fonction de chargement de la 
             police de caractère en mémoire.
             """
-            
+          
             font_data =[0xF0, 0x90, 0x90, 0x90, 0xF0, #// 0
                         0x20, 0x60, 0x20, 0x20, 0x70, #// 1
                         0xF0, 0x10, 0xF0, 0x80, 0xF0, #// 2
@@ -76,12 +76,11 @@ class CPU:
             Instruction = (self.memory[self.PC] << 8) | self.memory[self.PC + 1]
 
             # Ici, pour les demi octets (un caractère hexa) je le récupère avec un ET logique.
-            Nug1 = (Instruction & 0xF000) >> 12             # l'exemple ici soit 0xABCD. On f
+            Nug1 = (Instruction & 0xF000) >> 12             # l'exemple ici soit 0xABCD. On fait un découpage où l'on récupère chaque caractère hexadécimal.
             Nug2 = (Instruction & 0x0F00) >> 8
             Nug3 = (Instruction & 0x00F0) >> 4
             Nug4 = (Instruction & 0x000F)
-
-            # Un exemple pour bien comprendre : supposons que j'attrape l'instruction 0xABCD (
+            # Un exemple pour bien comprendre : supposons que l'on attrape l'instruction 0xABCD : 
 
             X = Nug2   #A
             Y = Nug3   #B   
@@ -110,16 +109,20 @@ class CPU:
                     px = (Sprite_Byte >> (7 - colone)) & 1
                     x_pos = (self.VX[X] + colone) % 64
                     y_pos = (self.VX[Y] + line) % 32
-
             
                     if px ==1 :
                         if self.Win_buffer[y_pos][x_pos] == 1 : 
                             self.VX[0xF] = 1
-                        self.Win_buffer[y_pos][x_pos] ^=1 
+                        self.Win_buffer[y_pos][x_pos] ^=1                   # On Xor les coordonnées afin d'éviter les dépassements dans le buffer.  
                 
             return self.Win_buffer
         
         def Reset_Window_Buffer(self):
+            """
+            Raffraichit le buffer d'écran
+            en remettant tout les coefficients 
+            de la matrice à zéro.
+            """
             self.Win_buffer = [[0 for _ in range(64)] for _ in range(32)]
             return self.Win_buffer
 
@@ -129,6 +132,7 @@ class CPU:
             elle émule le pipeline de la 
             console.
             """
+            
             Instruction, Nug1, Nug2, Nug3, Nug4, X, Y, N, NN, NNN = self.decode()
             
             if Instruction == 0x00e0 :
@@ -136,21 +140,21 @@ class CPU:
                 self.PC += 2
 
             elif Instruction == 0x00ee:
-
+                #depop la pile, retour à l'adresse contenue dans la stack 
                 self.PC = self.stack.pop()
-                #print("depop la pile, retour à l'adresse contenue dans la stack")
             
 
             elif Nug1 == 0x1:
+                # mise de PC à NNN
                 self.PC = NNN
-                #print("Mise de PC à  |{}| | PROG COUNTER : {}".format(NNN, PC))
 
             elif Nug1 == 0x2:
-                #appelle du sous programme. 
-                self.stack.append(self.PC + 2)                         # le append c'est comme un push en assembleur. (cf archi ordi)
+                #appelle du sous programme. Push la prochaine instruction  
+                self.stack.append(self.PC + 2)                         
                 self.PC = NNN
 
             elif Nug1 == 0x3: 
+                # saut conditionnel
                 if self.VX[X] == NN:
                     self.PC += 4
                 else:
@@ -158,6 +162,7 @@ class CPU:
 
 
             elif Nug1 == 0x4: 
+                # saut conditionnel
                 if self.VX[X] != NN:
                     self.PC += 4
                 else: 
@@ -166,6 +171,7 @@ class CPU:
 
 
             elif Nug1 == 0x5 and Nug4 == 0x0:
+                # saut conditionnel
                 if self.VX[X] == self.VX[Y]:
                     self.PC+=4
                 else:
@@ -173,8 +179,8 @@ class CPU:
 
 
             elif Nug1 == 0x6:
+                # mise de VX à NN
                 self.VX[X] = NN
-                #print("Mise de VX à |{}| | REGISTRE : ".format(NN, VX))
                 self.PC +=2
 
             elif Nug1 == 0x7:
@@ -195,7 +201,7 @@ class CPU:
                     self.VX[X] = (self.VX[X] | self.VX[Y])
 
                 elif Nug4 == 0x2: # and
-                    self.VX[X] = (self.VX[X] & self.VX[Y])      
+                    self.VX[X] = (self.VX[X] & self.VX[Y])     
 
                 elif Nug4 == 0x3: #xor
                     self.VX[X] ^= self.VX[Y]                
@@ -210,6 +216,7 @@ class CPU:
                     else :
                         self.VX[0xF] = 0
 
+                    #self.PC +=2
 
                 elif Nug4 == 0x5:   #sub     
                     tempvx = self.VX[X] 
@@ -221,15 +228,16 @@ class CPU:
                         self.VX[0xF] = 1 
                     else :
                         self.VX[0xF] = 0
+                    #self.PC +=2
 
                 elif Nug4 == 0x6:   # shift right 
                     tempvx = self.VX[X]  
-                    self.VX[X] = (tempvx >> 1) & 0xFF     # et là on a le choix entre set vx à vy et shifté ou juste shifté vx. Selon la doc, la méthode moderne est de ne traité que vx (1990).
+                    self.VX[X] = (tempvx >> 1) & 0xFF                    # et là on a le choix entre set vx à vy et shifté ou juste shifté vx. Selon la doc, la méthode moderne est de ne traité que vx (1990)
 
-                    self.VX[0xF] = tempvx & 1             # ici on récupère le bit que l'on va perdre après être shifté vers la droite avec un bitwise and
+                    self.VX[0xF] = tempvx & 1             #ici on récupère le bit que l'on va perdre après être shifté vers la droite avec un bitwise and
                     
 
-                elif Nug4 == 0x7:    #sub   
+                elif Nug4 == 0x7:    #sub  
                     self.VX[X]  = (self.VX[Y] - self.VX[X]) % 256
 
                     if self.VX[Y] >= self.VX[X]:
@@ -238,12 +246,13 @@ class CPU:
                         self.VX[0xF] = 0
                                         
 
-                elif Nug4 == 0xe:    #left shift   
+                elif Nug4 == 0xe:    # shift left   
                     tempvx = self.VX[X]
-                    self.VX[X] = (tempvx << 1 ) & 0xFF          #et là on shift comme dit dans la doc 
+                    self.VX[X] = (tempvx << 1 ) & 0xFF          
 
-                    self.VX[0xF] = (tempvx & 0x80) >> 7         #on récup le dernier bit que l'on va perdre après le shift que l'on décale vers la droite pour que ce soit un vrai bit
+                    self.VX[0xF] = (tempvx & 0x80) >> 7         #on récupère le dernier bit que l'on va perdre après le shift que l'on décale vers la droite pour que ce soit un vrai bit
 
+                    
                 self.PC +=2
     #--------------------------------------------------------------------
 
@@ -267,6 +276,12 @@ class CPU:
                        
 
             elif Nug1 == 0xd:
+                """
+                instruction de dessin.
+                met N bits à un ou à 
+                zéro dans le buffer d'écran
+                à la position (X, Y)
+                """
                 self.Mapping(X, Y, N)
                 self.PC += 2
 
@@ -281,12 +296,13 @@ class CPU:
                     self.PC+=2
               
 
-            elif Nug1 == 0xe and Nug3 == 0xa and Nug4 == 0x1: #ajouter la condition de skipping la clé n'est pas pressé                 
+            elif Nug1 == 0xe and Nug3 == 0xa and Nug4 == 0x1: #ajouter la condition de skipping la clé n'est pas pressé 
+                print("VOICI LE KEYPAD",self.keypad)
+                
                 if self.keypad[self.VX[X]] == 0:
                     self.PC+=4
                 else :
                     self.PC+=2
-
     #-------------------------------------------------------
 
             elif Nug1 == 0xf: 
@@ -299,20 +315,20 @@ class CPU:
                     self.PC +=2
                 
                 elif Nug3 == 0x3 and Nug4 == 0x3:
+
+                    
                     """
                     ici, on utilisera la division entière, très pratique pour 
                     récupérer les valeurs dizaines et centaines, exemple :
                     123 // 100 = 1
-                    """
-                    
+                    """                    
                     decX = int(self.VX[X])
 
-                    self.memory[self.Index]     = self.VX[X] // 100
-                    self.memory[self.Index + 1] = (self.VX[X] // 10 )%10                                         
-                    self.memory[self.Index + 2] = self.VX[X]% 10
-                                        
+                    self.memory[self.Index]     = self.VX[X] // 100                    
+                    self.memory[self.Index + 1] = (self.VX[X] // 10 )%10                     
+                    self.memory[self.Index + 2] = self.VX[X]% 10                    
                     self.PC += 2
-    #------------TIMERS :--------------------------------#
+    #------------TIMERS :-------------------------------#
 
                 elif Nug3 == 0x0 and Nug4 == 0x7:
                     self.VX[X] = self.delay_timer
@@ -327,15 +343,15 @@ class CPU:
     #-------------- DATA STORAGE------------------------#
 
                 elif Nug3 == 0x5 and Nug4 == 5:
+                   
                     for i in range(X + 1):
                         self.memory[self.Index + i] = self.VX[i ] 
                     self.PC+=2
-
                 elif Nug3 == 0x6 and Nug4 == 0x5:             
+                    
                     for i in range(X + 1):
                         self.VX[i] = self.memory[self.Index + i]                    
-                    self.PC+= 2
-
+                    self.PC+= 2 
                 elif Nug4 == 0xa :
                     key_is_pressed = False
                     for i in range(16):

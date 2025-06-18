@@ -2,8 +2,7 @@
 import pygame as ga
 class Input : 
     """
-    pour l'instant, faire sans, directement sur le processseur.
-    Classe qui servira au entrées utilisateurs.
+    Classe qui sert d'entrées utilisateurs.
     """
     def __init__(self) :
         
@@ -35,6 +34,10 @@ class Input :
    
    
     def update(self, events):
+        """
+        Mise à jour des touches
+        sont-elles pressées ou non.
+        """
         for event in events: 
             if event.type == ga.KEYDOWN:
                 if event.key in self.key_map:

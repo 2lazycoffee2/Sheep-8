@@ -7,7 +7,7 @@ ga.init()
 
 class Display:
 
-    def __init__(self) : #Win_buffer): #Window, scale, Win_buffer):
+    def __init__(self) : 
         
         """
         Constructeur de la classe Display : 

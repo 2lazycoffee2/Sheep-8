@@ -35,6 +35,7 @@ class UI:
         self.toolbar = None
         self.toolbar_enabled = True  # Pour activer/désactiver la toolbar dynamiquement
         self.framerate = config['framerate']  #Vitesse d'émulation
+        self.fullscreen_on_start = config.get('fullscreen_on_start', False)
         self.create_menu()
         if self.toolbar_enabled:
             self.create_toolbar()
@@ -285,6 +286,13 @@ class UI:
         if self.toolbar:
             self.update_toolbar()
 
+    def _set_fullscreen_on_start_callback(self, enabled):
+        """
+        Callback pour sauvegarder l'option plein écran au lancement
+        """
+        self.fullscreen_on_start = enabled
+        self.save_config()
+
     def show_settings(self):
         """
         Affichage des paramètres de l'émulateur
@@ -294,8 +302,10 @@ class UI:
             'language': self.language,
             'toolbar_enabled': self.toolbar_enabled,
             'framerate': self.framerate,
+            'fullscreen_on_start': self.fullscreen_on_start,
             'set_language_callback': self._set_language_callback,
             'set_framerate_callback': self._set_framerate_callback,
+            'set_fullscreen_on_start_callback': self._set_fullscreen_on_start_callback,
             'save_config_callback': self.save_config,
             'save_toolbar_callback': self._save_toolbar_callback
         }
@@ -361,6 +371,7 @@ class UI:
             self.rom_path,
             self.stop_event,
             self.framerate,
+            fullscreen=self.fullscreen_on_start,
             monitor_factory=self._monitor_factory,
             fullscreen_toggle_event=self._fullscreen_toggle_requested
         )
@@ -384,7 +395,8 @@ class UI:
         data = {
             'folders': self.loaded_folders,
             'language': self.language,
-            'framerate': self.framerate
+            'framerate': self.framerate,
+            'fullscreen_on_start': getattr(self, 'fullscreen_on_start', False)
         }
         try:
             with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
@@ -396,7 +408,7 @@ class UI:
         """
         Charge toutes les préférences utilisateur depuis config.json
         """
-        config = {'folders': [], 'language': 'fr', 'framerate': 500}
+        config = {'folders': [], 'language': 'fr', 'framerate': 500, 'fullscreen_on_start': False}
         try:
             if os.path.exists(CONFIG_FILE):
                 with open(CONFIG_FILE, 'r', encoding='utf-8') as f:

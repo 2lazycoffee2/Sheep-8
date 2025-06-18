@@ -22,9 +22,11 @@ class SettingsWindow(tk.Toplevel):
         self.language = context['language'] #Langue actuelle
         self.toolbar_enabled = context['toolbar_enabled'] #État de la toolbar
         self.framerate = context['framerate'] #Fréquence de rafraîchissement
+        self.fullscreen_on_start = context.get('fullscreen_on_start', False)
         self.set_language_callback = context['set_language_callback'] #Callback pour changer la langue
         self.set_framerate_callback = context['set_framerate_callback'] # Callback pour synchroniser la fréquence de rafraîchissement
         self.save_config_callback = context['save_config_callback'] #Callback pour enregistrer les paramètres
+        self.set_fullscreen_on_start_callback = context.get('set_fullscreen_on_start_callback', None)
         self.title(self.translations[self.language]['settings']) #Titre de la fenêtre
         self.geometry('350x300') #Taille de la fenêtre
         self.widgets = {} #Dictionnaire pour stocker les widgets
@@ -35,6 +37,15 @@ class SettingsWindow(tk.Toplevel):
         Fonction pour activer/désactiver la toolbar
         """
         self.toolbar_enabled = self.widgets['var_toolbar'].get()
+        self.save_config_callback()
+
+    def _toggle_fullscreen_on_start(self):
+        """
+        Fonction pour activer/désactiver le lancement en plein écran
+        """
+        self.fullscreen_on_start = self.widgets['var_fullscreen_on_start'].get()
+        if hasattr(self, 'set_fullscreen_on_start_callback'):
+            self.set_fullscreen_on_start_callback(self.fullscreen_on_start)
         self.save_config_callback()
 
     def _update_all_framerate(self, val):
@@ -111,8 +122,15 @@ class SettingsWindow(tk.Toplevel):
         var_toolbar = tk.BooleanVar(value=self.toolbar_enabled)
         self.widgets['var_toolbar'] = var_toolbar
         cb = ttk.Checkbutton(self, text=t.get('show_toolbar', t['show_toolbar']), variable=var_toolbar, command=self._toggle_toolbar)
-        cb.pack(pady=20)
+        cb.pack(pady=10)
         self.widgets['cb'] = cb
+
+        # Plein écran au lancement
+        var_fullscreen_on_start = tk.BooleanVar(value=self.fullscreen_on_start)
+        self.widgets['var_fullscreen_on_start'] = var_fullscreen_on_start
+        cb_fullscreen = ttk.Checkbutton(self, text=t.get('fullscreen_on_start', 'Lancer les jeux en plein écran'), variable=var_fullscreen_on_start, command=self._toggle_fullscreen_on_start)
+        cb_fullscreen.pack(pady=5)
+        self.widgets['cb_fullscreen'] = cb_fullscreen
 
 
         # Slider + champ d'entrée pour la vitesse d'émulation

@@ -32,5 +32,6 @@
     "show_toolbar": "Show Toolbar",
     "framerate": "Emulation Speed (Operations per second) \n Default : 500 Hz | Set to -1 for unlimited",
     "framerate_unlimited": "Unlimited",
-    "fullscreen": "Fullscreen"
+    "fullscreen": "Fullscreen",
+    "fullscreen_on_start": "Launch games in fullscreen"
 }

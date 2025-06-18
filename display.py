@@ -22,8 +22,8 @@ class Display:
         self.Window = ga.display.set_mode((self.height*self.scale, self.width*self.scale))
 
         #Couleurs
-        self.Black =  (0, 0, 0)
-        self.White = (255, 255, 255)
+        self.bgcolor =  (0, 0, 0)
+        self.spritecolor = (255, 255, 255)
 
         #self.Win_buffer = Win_buffer
 
@@ -38,9 +38,9 @@ class Display:
         for i in range(self.height):
             for j in range(self.width):
                 if Win_buffer[j][i] == 1:
-                    ga.draw.rect(self.Window, self.White, [i*self.scale,j*self.scale, self.scale, self.scale], 0)
+                    ga.draw.rect(self.Window, self.spritecolor, [i*self.scale,j*self.scale, self.scale, self.scale], 0)
                 else:
-                    ga.draw.rect(self.Window, self.Black, [i*self.scale,j*self.scale, self.scale, self.scale], 0)
+                    ga.draw.rect(self.Window, self.bgcolor, [i*self.scale,j*self.scale, self.scale, self.scale], 0)
         ga.display.update()
 
     def set_fullscreen(self, enabled: bool):

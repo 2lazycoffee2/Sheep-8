@@ -33,5 +33,8 @@
     "framerate": "Vitesse d'émulation (opérations par seconde) \n Par défaut : 500 Hz | Mettre à -1 pour illimité",
     "framerate_unlimited": "Illimité",
     "fullscreen": "Plein écran",
-    "fullscreen_on_start": "Lancer les jeux en plein écran"
+    "fullscreen_on_start": "Lancer les jeux en plein écran",
+    "bgcolor": "Couleur de fond",
+    "spritecolor": "Couleur des sprites",
+    "restore_defaults": "Restaurer les valeurs par défaut"
 }

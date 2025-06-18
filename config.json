@@ -4,5 +4,15 @@
   ],
   "language": "fr",
   "framerate": 1000,
-  "fullscreen_on_start": true
+  "fullscreen_on_start": true,
+  "bgcolor": [
+    64,
+    0,
+    128
+  ],
+  "spritecolor": [
+    255,
+    198,
+    255
+  ]
 }

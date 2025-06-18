@@ -36,6 +36,8 @@ class UI:
         self.toolbar_enabled = True  # Pour activer/désactiver la toolbar dynamiquement
         self.framerate = config['framerate']  #Vitesse d'émulation
         self.fullscreen_on_start = config.get('fullscreen_on_start', False)
+        self.bgcolor = config.get('bgcolor', (0, 0, 0))
+        self.spritecolor = config.get('spritecolor', (255, 255, 255))
         self.create_menu()
         if self.toolbar_enabled:
             self.create_toolbar()
@@ -293,6 +295,24 @@ class UI:
         self.fullscreen_on_start = enabled
         self.save_config()
 
+    def _set_bgcolor_callback(self, rgb):
+        """
+        Callback pour changer la couleur de fond
+        """
+        self.bgcolor = rgb
+        self.save_config()
+        if hasattr(self, '_monitor') and self._monitor:
+            self._monitor.bgcolor = rgb
+
+    def _set_spritecolor_callback(self, rgb):
+        """
+        Callback pour changer la couleur des sprites
+        """
+        self.spritecolor = rgb
+        self.save_config()
+        if hasattr(self, '_monitor') and self._monitor:
+            self._monitor.spritecolor = rgb
+
     def show_settings(self):
         """
         Affichage des paramètres de l'émulateur
@@ -303,9 +323,13 @@ class UI:
             'toolbar_enabled': self.toolbar_enabled,
             'framerate': self.framerate,
             'fullscreen_on_start': self.fullscreen_on_start,
+            'bgcolor': getattr(self, 'bgcolor', (0, 0, 0)),
+            'spritecolor': getattr(self, 'spritecolor', (255, 255, 255)),
             'set_language_callback': self._set_language_callback,
             'set_framerate_callback': self._set_framerate_callback,
             'set_fullscreen_on_start_callback': self._set_fullscreen_on_start_callback,
+            'set_bgcolor_callback': self._set_bgcolor_callback,
+            'set_spritecolor_callback': self._set_spritecolor_callback,
             'save_config_callback': self.save_config,
             'save_toolbar_callback': self._save_toolbar_callback
         }
@@ -360,6 +384,8 @@ class UI:
         Factory pour créer un objet Display
         """
         self._monitor = disp.Display()
+        self._monitor.bgcolor = getattr(self, 'bgcolor', (0, 0, 0))
+        self._monitor.spritecolor = getattr(self, 'spritecolor', (255, 255, 255))
         return self._monitor
 
     def run_emulator(self):
@@ -396,7 +422,9 @@ class UI:
             'folders': self.loaded_folders,
             'language': self.language,
             'framerate': self.framerate,
-            'fullscreen_on_start': getattr(self, 'fullscreen_on_start', False)
+            'fullscreen_on_start': getattr(self, 'fullscreen_on_start', False),
+            'bgcolor': getattr(self, 'bgcolor', (0, 0, 0)),
+            'spritecolor': getattr(self, 'spritecolor', (255, 255, 255))
         }
         try:
             with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
@@ -408,7 +436,7 @@ class UI:
         """
         Charge toutes les préférences utilisateur depuis config.json
         """
-        config = {'folders': [], 'language': 'fr', 'framerate': 500, 'fullscreen_on_start': False}
+        config = {'folders': [], 'language': 'fr', 'framerate': 500, 'fullscreen_on_start': False, 'bgcolor': (0, 0, 0), 'spritecolor': (255, 255, 255)}
         try:
             if os.path.exists(CONFIG_FILE):
                 with open(CONFIG_FILE, 'r', encoding='utf-8') as f:

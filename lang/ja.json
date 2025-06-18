@@ -33,5 +33,8 @@
     "framerate": "エミュレーション速度 (オペレーション毎秒) \n デフォルト: 500 Hz | -1に設定で無制限",
     "framerate_unlimited": "無制限",
     "fullscreen": "フルスクリーン",
-    "fullscreen_on_start": "フルスクリーンでゲームを起動"
+    "fullscreen_on_start": "フルスクリーンでゲームを起動",
+    "bgcolor": "背景色",
+    "spritecolor": "スプライト色",
+    "restore_defaults": "デフォルトに戻す"
 }

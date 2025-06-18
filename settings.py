@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import tkinter.colorchooser as cc
 import os
 import json
 
@@ -27,8 +28,12 @@ class SettingsWindow(tk.Toplevel):
         self.set_framerate_callback = context['set_framerate_callback'] # Callback pour synchroniser la fréquence de rafraîchissement
         self.save_config_callback = context['save_config_callback'] #Callback pour enregistrer les paramètres
         self.set_fullscreen_on_start_callback = context.get('set_fullscreen_on_start_callback', None)
+        self.bgcolor = tuple(int(x) for x in context.get('bgcolor', (0, 0, 0)))
+        self.spritecolor = tuple(int(x) for x in context.get('spritecolor', (255, 255, 255)))
+        self.set_bgcolor_callback = context.get('set_bgcolor_callback', None)
+        self.set_spritecolor_callback = context.get('set_spritecolor_callback', None)
         self.title(self.translations[self.language]['settings']) #Titre de la fenêtre
-        self.geometry('350x300') #Taille de la fenêtre
+        self.geometry('420x420') #Taille de la fenêtre
         self.widgets = {} #Dictionnaire pour stocker les widgets
         self._build_ui() #Construction de l'interface utilisateur
 
@@ -107,6 +112,38 @@ class SettingsWindow(tk.Toplevel):
             self.save_config_callback()
             self._build_ui()
 
+    def _choose_bgcolor(self):
+        """
+        Ouvre une boîte de dialogue pour choisir la couleur de fond
+        """
+        color = cc.askcolor(color=self.bgcolor, title="Choisir la couleur de fond")
+        if color and color[0]:
+            rgb = tuple(int(x) for x in color[0])
+            self.bgcolor = rgb
+            self.widgets['bgcolor_btn'].config(bg=self._rgb_to_hex(rgb))
+            if hasattr(self, 'set_bgcolor_callback'):
+                self.set_bgcolor_callback(rgb)
+            self.save_config_callback()
+
+    def _choose_spritecolor(self):
+        """
+        Ouvre une boîte de dialogue pour choisir la couleur des sprites
+        """
+        color = cc.askcolor(color=self.spritecolor, title="Choisir la couleur des sprites")
+        if color and color[0]:
+            rgb = tuple(int(x) for x in color[0])
+            self.spritecolor = rgb
+            self.widgets['spritecolor_btn'].config(bg=self._rgb_to_hex(rgb))
+            if hasattr(self, 'set_spritecolor_callback'):
+                self.set_spritecolor_callback(rgb)
+            self.save_config_callback()
+
+    def _rgb_to_hex(self, rgb):
+        """
+        Convertit une couleur RGB en format hexadécimal
+        """
+        return '#%02x%02x%02x' % rgb
+
     def _build_ui(self):
 
         """
@@ -181,6 +218,28 @@ class SettingsWindow(tk.Toplevel):
         self.widgets['lang_combo'] = lang_combo
         lang_combo.bind('<<ComboboxSelected>>', self._on_language_change)
 
+        # Couleurs de fond et des sprites
+        color_frame = tk.Frame(self)
+        color_frame.pack(pady=(10,0))
+        t = self._get_translations(self.language)
+        bg_label = tk.Label(color_frame, text=t.get('bgcolor', 'Couleur de fond'))
+        bg_label.grid(row=0, column=0, padx=5)
+        bgcolor_btn = tk.Button(color_frame, bg=self._rgb_to_hex(self.bgcolor), width=8, command=self._choose_bgcolor)
+        bgcolor_btn.grid(row=1, column=0, padx=5)
+        self.widgets['bg_label'] = bg_label
+        self.widgets['bgcolor_btn'] = bgcolor_btn
+        sprite_label = tk.Label(color_frame, text=t.get('spritecolor', 'Couleur des sprites'))
+        sprite_label.grid(row=0, column=1, padx=5)
+        spritecolor_btn = tk.Button(color_frame, bg=self._rgb_to_hex(self.spritecolor), width=8, command=self._choose_spritecolor)
+        spritecolor_btn.grid(row=1, column=1, padx=5)
+        self.widgets['sprite_label'] = sprite_label
+        self.widgets['spritecolor_btn'] = spritecolor_btn
+
+        # Bouton Restaurer les valeurs par défaut
+        restore_btn = ttk.Button(self, text=t.get('restore_defaults', 'Restaurer les valeurs par défaut'), command=self._restore_defaults)
+        restore_btn.pack(pady=8)
+        self.widgets['restore_btn'] = restore_btn
+
         # Bouton OK
         ok_btn = ttk.Button(self, text=t.get('ok', 'OK'), command=self.destroy)
         ok_btn.pack(pady=10)
@@ -200,3 +259,32 @@ class SettingsWindow(tk.Toplevel):
                 return json.load(f)
         except Exception:
             return self.translations[self.language]
+
+    def _restore_defaults(self):
+        """
+        Restaure les valeurs par défaut des paramètres.
+        """
+        # Valeurs par défaut
+        self.bgcolor = (0, 0, 0)
+        self.spritecolor = (255, 255, 255)
+        self.fullscreen_on_start = False
+        self.toolbar_enabled = True
+        self.framerate = 500
+        # Met à jour les widgets
+        self.widgets['bgcolor_btn'].config(bg=self._rgb_to_hex(self.bgcolor))
+        self.widgets['spritecolor_btn'].config(bg=self._rgb_to_hex(self.spritecolor))
+        self.widgets['var_fullscreen_on_start'].set(self.fullscreen_on_start)
+        self.widgets['var_toolbar'].set(self.toolbar_enabled)
+        self.widgets['fr_slider'].set(self.framerate)
+        self.widgets['fr_entry_var'].set(str(self.framerate))
+        self.widgets['fr_value_label'].config(text=f"{self._get_translations(self.language)['framerate_unlimited']}" if self.framerate < 0 else f"{self.framerate} Hz")
+        # Appelle les callbacks pour synchroniser l'UI principale
+        if hasattr(self, 'set_bgcolor_callback'):
+            self.set_bgcolor_callback(self.bgcolor)
+        if hasattr(self, 'set_spritecolor_callback'):
+            self.set_spritecolor_callback(self.spritecolor)
+        if hasattr(self, 'set_fullscreen_on_start_callback'):
+            self.set_fullscreen_on_start_callback(self.fullscreen_on_start)
+        if hasattr(self, 'set_framerate_callback'):
+            self.set_framerate_callback(self.framerate)
+        self.save_config_callback()

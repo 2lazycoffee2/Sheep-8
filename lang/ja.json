@@ -29,5 +29,7 @@
     "github": "GitHubリポジトリ",
     "language": "言語",
     "language_name": "日本語",
-    "show_toolbar": "ツールバーを表示"
+    "show_toolbar": "ツールバーを表示",
+    "framerate": "エミュレーション速度 (オペレーション毎秒) \n デフォルト: 500 Hz | -1に設定で無制限",
+    "framerate_unlimited": "無制限"
 }

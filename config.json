@@ -1,1 +1,7 @@
-{"folders": ["C:/Users/victo/Downloads/rom/rom"], "language": "fr"}
+{
+  "folders": [
+    "C:/Users/victo/Downloads/rom/rom"
+  ],
+  "language": "fr",
+  "framerate": 500
+}

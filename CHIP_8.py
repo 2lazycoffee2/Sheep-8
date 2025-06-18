@@ -6,7 +6,7 @@ import core as co
 import input as controller
 import sys
 
-def run(rom_path, stop_event=None):
+def run(rom_path, stop_event=None, framerate=-30):
     """
     Fonction principale pour lancer l'émulateur CHIP-8.
     """
@@ -56,7 +56,7 @@ def run(rom_path, stop_event=None):
         else:
             beep_channel.stop()
         monitor.Draw_pixel(coreprocess.Win_buffer)
-        ga.time.Clock().tick(-30)
+        ga.time.Clock().tick(framerate)
     
     ga.quit()
     return

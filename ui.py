@@ -9,6 +9,7 @@ import sys
 import CHIP_8 as C8
 from PIL import Image, ImageTk
 from toolbar import Toolbar
+from settings import SettingsWindow
 
 CONFIG_FILE = "config.json"
 LANG_DIR = "lang"
@@ -32,6 +33,7 @@ class UI:
         self.stop_event = threading.Event() #Évènement d'arrêt
         self.toolbar = None
         self.toolbar_enabled = True  # Pour activer/désactiver la toolbar dynamiquement
+        self.framerate = self.load_framerate()  #Vitesse d'émulation
         self.create_menu()
         if self.toolbar_enabled:
             self.create_toolbar()
@@ -282,66 +284,47 @@ class UI:
         """
         Affichage des paramètres de l'émulateur
         """
-        t = self.translations[self.language]
+        settings_context = {
+            'translations': self.translations,
+            'language': self.language,
+            'toolbar_enabled': self.toolbar_enabled,
+            'framerate': self.framerate,
+            'set_language_callback': self._set_language_callback,
+            'save_framerate_callback': self._save_framerate_callback,
+            'save_language_callback': self._save_language_callback,
+            'save_toolbar_callback': self._save_toolbar_callback
+        }
+        SettingsWindow(self.root, settings_context)
 
-        # Option pour activer/désactiver la toolbar
-        def toggle_toolbar():
-            '''
-            Fonction pour activer/désactiver la toolbar
-            '''
-            if var_toolbar.get():
-                self.toolbar_enabled = True
-                self.create_toolbar()
-            else:
-                self.toolbar_enabled = False
-                if self.toolbar:
-                    self.toolbar.destroy()
-                    self.toolbar = None
+    def _set_language_callback(self, lang_code):
+        """
+        Callback pour changer la langue
+        """
+        self.set_language(lang_code)
 
-        # Callback pour changement de langue
-        def on_language_change(event=None):
-            '''
-            Fonction de changement de langue
-            '''
-            # Récupère le code langue à partir du label sélectionné
-            selected_label = lang_var.get()
-            lang_code = label_to_code[selected_label]
-            if lang_code != self.language:
-                self.set_language(lang_code)
-                # Met à jour dynamiquement la fenêtre de paramètres
-                settings_win.destroy()
-                self.show_settings()
+    def _save_framerate_callback(self, framerate):
+        """
+        Callback pour sauvegarder le framerate
+        """
+        self.save_framerate(framerate)
 
-        #Liste des langues disponibles (à partir des fichiers dans lang/)
-        lang_files = [f for f in os.listdir(LANG_DIR) if f.endswith('.json')]
-        available_langs = [f[:-5] for f in lang_files]
-        # Mapping code -> label traduit
-        code_to_label = {code: self.load_translations(code).get('language_name', code) for code in available_langs}
-        label_to_code = {v: k for k, v in code_to_label.items()}
-        labels = [code_to_label[code] for code in available_langs]
-        #Label courant
-        current_label = code_to_label.get(self.language, self.language)
+    def _save_language_callback(self, lang):
+        """
+        Callback pour sauvegarder la langue
+        """
+        self.save_language(lang)
 
-        #Création de la fenêtre de paramètres
-        settings_win = tk.Toplevel(self.root)
-        settings_win.title(t['settings'])
-        settings_win.geometry('350x200')
-
-        #Toolbar checkbox
-        var_toolbar = tk.BooleanVar(value=self.toolbar_enabled)
-        cb = ttk.Checkbutton(settings_win, text=t.get('show_toolbar', t['show_toolbar']), variable=var_toolbar, command=toggle_toolbar)
-        cb.pack(pady=20) #Padding entre la checkbox et le haut de la fenêtre
-
-        # Sélecteur de langue
-        tk.Label(settings_win, text=t['language']).pack(pady=(5,0))
-        lang_var = tk.StringVar(value=current_label)
-        lang_combo = ttk.Combobox(settings_win, textvariable=lang_var, values=labels, state="readonly")
-        lang_combo.pack(pady=5)
-        lang_combo.bind('<<ComboboxSelected>>', on_language_change)
-
-        #tk.Label(settings_win, text=t['settings_msg']).pack(pady=10)
-
-        ttk.Button(settings_win, text="OK", command=settings_win.destroy).pack(pady=10)
+    def _save_toolbar_callback(self, enabled):
+        """
+        Callback pour sauvegarder l'état de la toolbar
+        """
+        self.toolbar_enabled = enabled
+        if enabled:
+            self.create_toolbar()
+        else:
+            if self.toolbar:
+                self.toolbar.destroy()
+                self.toolbar = None
 
     def show_help(self):
         """
@@ -361,7 +344,7 @@ class UI:
         """
         Exécution de l'émulateur
         """
-        C8.run(self.rom_path, self.stop_event)
+        C8.run(self.rom_path, self.stop_event, self.framerate)
         self.is_running = False # Quand la fenêtre de jeu se ferme, le statut de l'émulation est mis à jour
         if self.toolbar:
             self.update_toolbar()
@@ -399,7 +382,7 @@ class UI:
                     config = json.load(f)
             config['language'] = lang
             with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
-                json.dump(config, f)
+                json.dump(config, f, ensure_ascii=False, indent=2)
         except Exception as e:
             messagebox.showerror("Erreur", f"Erreur lors de la sauvegarde de la langue: {e}")
 
@@ -416,12 +399,37 @@ class UI:
             pass
         return 'fr'
 
+    def load_framerate(self):
+        """
+        Chargement du framerate depuis le fichier de config
+        """
+        try:
+            with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return data.get('framerate', 500)
+        except Exception:
+            return 500
+
+    def save_framerate(self, framerate):
+        """
+        Sauvegarde du framerate dans le fichier de config
+        """
+        try:
+            with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        except Exception:
+            data = {}
+        data['framerate'] = framerate
+        with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
     def on_close(self):
         """
         Actions à réaliser lors de la fermeture
         """
         self.save_folders_history()
         self.save_language(self.language)
+        self.save_framerate(self.framerate)
         self.root.destroy()
 
     def update_toolbar(self):

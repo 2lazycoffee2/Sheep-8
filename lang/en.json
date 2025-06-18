@@ -29,5 +29,7 @@
     "github": "GitHub Repository",
     "language": "Language",
     "language_name": "English",
-    "show_toolbar": "Show Toolbar"
+    "show_toolbar": "Show Toolbar",
+    "framerate": "Emulation Speed (Operations per second) \n Default : 500 Hz | Set to -1 for unlimited",
+    "framerate_unlimited": "Unlimited"
 }

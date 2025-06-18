@@ -50,6 +50,7 @@ class Toolbar:
             buttons.append(('start', 'play.png', self.actions.get('start')))
         else:
             buttons.append(('stop', 'stop.png', self.actions.get('stop')))
+        buttons.append(('fullscreen', 'fullscreen.png', self.actions.get('fullscreen')))
         buttons += [
             ('preferences', 'settings.png', self.actions.get('preferences')),
             ('help', 'help.png', self.actions.get('help'))

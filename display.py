@@ -42,4 +42,14 @@ class Display:
                 else:
                     ga.draw.rect(self.Window, self.Black, [i*self.scale,j*self.scale, self.scale, self.scale], 0)
         ga.display.update()
-        
+
+    def set_fullscreen(self, enabled: bool):
+        """
+        Active ou désactive le mode plein écran pour la fenêtre pygame, en adaptant l'affichage à la résolution de l'écran.
+        """
+        ga.display.quit()
+        ga.display.init()
+        flags = ga.FULLSCREEN | ga.SCALED if enabled else 0
+        size = (self.height * self.scale, self.width * self.scale)
+        self.Window = ga.display.set_mode(size, flags)
+        self.fullscreen = enabled

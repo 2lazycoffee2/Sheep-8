@@ -1,5 +1,6 @@
 #coding:utf8
 
+import display as disp
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import threading
@@ -103,6 +104,9 @@ class UI:
 
         #Bouton Options
         settings_menu = tk.Menu(menubar, tearoff=0)
+        settings_menu.add_command(label=t['fullscreen'], command=self.toggle_fullscreen, accelerator="F11")
+        self.root.bind('<F11>', lambda event: self.toggle_fullscreen())
+        settings_menu.add_separator()
         settings_menu.add_command(label=t['preferences'], command=self.show_settings, accelerator="Ctrl+P")
         self.root.bind('<Control-p>', lambda event: self.show_settings())
         menubar.add_cascade(label=t['menu_options'], menu=settings_menu)
@@ -132,6 +136,7 @@ class UI:
             'open_rom': self.open_file,
             'start': self.play_emulation,
             'stop': self.stop_emulation,
+            'fullscreen': self.toggle_fullscreen,
             'preferences': self.show_settings,
             'help': self.show_help
         }
@@ -340,14 +345,37 @@ class UI:
         t = self.translations[self.language]
         messagebox.showinfo(t['about'], t['about_msg'])
 
+    def _monitor_factory(self):
+        """
+        Factory pour créer un objet Display
+        """
+        self._monitor = disp.Display()
+        return self._monitor
+
     def run_emulator(self):
         """
         Exécution de l'émulateur
         """
-        C8.run(self.rom_path, self.stop_event, self.framerate)
-        self.is_running = False # Quand la fenêtre de jeu se ferme, le statut de l'émulation est mis à jour
+        self._fullscreen_toggle_requested = threading.Event()
+        C8.run(
+            self.rom_path,
+            self.stop_event,
+            self.framerate,
+            monitor_factory=self._monitor_factory,
+            fullscreen_toggle_event=self._fullscreen_toggle_requested
+        )
+        self.is_running = False
         if self.toolbar:
             self.update_toolbar()
+
+    def toggle_fullscreen(self):
+        """
+        Demande à l'émulateur de basculer en mode plein écran
+        """
+        if hasattr(self, '_fullscreen_toggle_requested') and self._fullscreen_toggle_requested is not None:
+            self._fullscreen_toggle_requested.set()
+        else:
+            messagebox.showinfo("Info", "L'émulation doit être lancée pour activer le plein écran.")
 
     def save_config(self):
         """

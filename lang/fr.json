@@ -31,5 +31,6 @@
     "language_name": "Français",
     "show_toolbar": "Afficher la barre d'outils",
     "framerate": "Vitesse d'émulation (opérations par seconde) \n Par défaut : 500 Hz | Mettre à -1 pour illimité",
-    "framerate_unlimited": "Illimité"
+    "framerate_unlimited": "Illimité",
+    "fullscreen": "Plein écran"
 }

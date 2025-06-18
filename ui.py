@@ -201,7 +201,7 @@ class UI:
         if folder:
             if folder not in self.loaded_folders:
                 self.loaded_folders.append(folder) #Ajout du dossier à la liste des dossiers chargés
-            self.save_folders_history()
+            self.save_config()
             self.rom_list += [os.path.join(folder, f) for f in os.listdir(folder) if f.lower().endswith(('.ch8'))] #Ajout des ROMs du dossier à la liste
             self.update_rom_listbox()   #Mise à jour de la liste des ROMs
             if not any(f.lower().endswith('.ch8') for f in os.listdir(folder)):

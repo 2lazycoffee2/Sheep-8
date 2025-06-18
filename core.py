@@ -6,13 +6,12 @@ class CPU:
         Classe définissant le coeur de la console : 
         """
 
-        def __init__(self, rom_file, font_file, keypad):
+        def __init__(self, rom_file, keypad):
             
             """
             Constructeur de la classe CPU
             """
             self.rom = rom_file
-            self.font = font_file
 
             self.PC = 0x200
             self.memory = [0]*4096
@@ -289,15 +288,14 @@ class CPU:
 
 
     #-------------//KEY IS PRESSED OR NOT------------------#
-            elif Nug1 == 0xe and Nug3 == 0x9: #ajouter la condition de skipping ssi la clé correspondandt à la valeur dans VX est pressé
+            elif Nug1 == 0xe and Nug3 == 0x9: 
                 if  self.keypad[self.VX[X]] == 1:
                     self.PC+=4
                 else :
                     self.PC+=2
               
 
-            elif Nug1 == 0xe and Nug3 == 0xa and Nug4 == 0x1: #ajouter la condition de skipping la clé n'est pas pressé 
-                print("VOICI LE KEYPAD",self.keypad)
+            elif Nug1 == 0xe and Nug3 == 0xa and Nug4 == 0x1: 
                 
                 if self.keypad[self.VX[X]] == 0:
                     self.PC+=4

@@ -23,9 +23,8 @@ class SettingsWindow(tk.Toplevel):
         self.toolbar_enabled = context['toolbar_enabled'] #État de la toolbar
         self.framerate = context['framerate'] #Fréquence de rafraîchissement
         self.set_language_callback = context['set_language_callback'] #Callback pour changer la langue
-        self.save_framerate_callback = context['save_framerate_callback'] #Callback pour enregistrer la fréquence de rafraîchissement
-        self.save_language_callback = context['save_language_callback'] #Callback pour enregistrer la langue
-        self.save_toolbar_callback = context['save_toolbar_callback'] #Callback pour enregistrer l'état de la toolbar
+        self.set_framerate_callback = context['set_framerate_callback'] # Callback pour synchroniser la fréquence de rafraîchissement
+        self.save_config_callback = context['save_config_callback'] #Callback pour enregistrer les paramètres
         self.title(self.translations[self.language]['settings']) #Titre de la fenêtre
         self.geometry('350x300') #Taille de la fenêtre
         self.widgets = {} #Dictionnaire pour stocker les widgets
@@ -36,7 +35,7 @@ class SettingsWindow(tk.Toplevel):
         Fonction pour activer/désactiver la toolbar
         """
         self.toolbar_enabled = self.widgets['var_toolbar'].get()
-        self.save_toolbar_callback(self.toolbar_enabled)
+        self.save_config_callback()
 
     def _update_all_framerate(self, val):
         """
@@ -48,6 +47,9 @@ class SettingsWindow(tk.Toplevel):
         except ValueError:
             return
         self.framerate = framerate_value
+
+        if hasattr(self, 'set_framerate_callback'):  #Met à jour la valeur dans l'objet principal (UI)
+            self.set_framerate_callback(framerate_value)
         self.widgets['fr_value_label'].config(text=f"{t['framerate_unlimited']}" if framerate_value < 0 else f"{framerate_value} Hz") #Label valeur fréq rafraîchissement
         if int(float(self.widgets['fr_slider'].get())) != framerate_value:
             self.widgets['fr_slider'].set(framerate_value)
@@ -65,7 +67,7 @@ class SettingsWindow(tk.Toplevel):
         Fonction appelée lors du relâchement du slider
         """
         self._update_all_framerate(self.widgets['fr_slider'].get())
-        self.save_framerate_callback(self.framerate)
+        self.save_config_callback()
 
     def _on_entry_validate(self, *args):
         """
@@ -76,7 +78,7 @@ class SettingsWindow(tk.Toplevel):
             framerate_value = int(float(val))
             if -1 <= framerate_value <= 1000:
                 self._update_all_framerate(framerate_value)
-                self.save_framerate_callback(framerate_value)
+                self.save_config_callback()
         except ValueError:
             pass
 
@@ -91,7 +93,7 @@ class SettingsWindow(tk.Toplevel):
         if lang_code != self.language:
             self.language = lang_code
             self.set_language_callback(lang_code)
-            self.save_language_callback(lang_code)
+            self.save_config_callback()
             self._build_ui()
 
     def _build_ui(self):

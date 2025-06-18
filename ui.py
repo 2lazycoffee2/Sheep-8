@@ -20,11 +20,11 @@ class UI:
         Initialisation de l'interface utilisateur
         """
         self.root = root
-        self.root.title("Sheep 8")  # Titre de la fenêtre, nom international de l'émulateur
-        self.language = self.load_language()  # Charge la langue depuis le config
+        self.root.title("Sheep 8")  #Titre de la fenêtre
+        config = self.load_config() #Chargement du fichier de config
+        self.language = config['language'] #Chargement de la langue
         self.translations = {self.language: self.load_translations(self.language)}
-        self.loaded_folders = [] # Liste des dossiers chargés précédemment
-        self.load_folders_history()
+        self.loaded_folders = config['folders'] #Liste des dossiers chargés précédemment
         self.rom_list = [] # Liste des ROMs
         self.rom_path = None # Initialisation du chemin de la ROM
         self.emulation_thread = None
@@ -33,7 +33,7 @@ class UI:
         self.stop_event = threading.Event() #Évènement d'arrêt
         self.toolbar = None
         self.toolbar_enabled = True  # Pour activer/désactiver la toolbar dynamiquement
-        self.framerate = self.load_framerate()  #Vitesse d'émulation
+        self.framerate = config['framerate']  #Vitesse d'émulation
         self.create_menu()
         if self.toolbar_enabled:
             self.create_toolbar()
@@ -65,7 +65,7 @@ class UI:
         Changement de la langue de l'interface utilisateur
         """
         self.language = lang
-        self.save_language(lang)
+        self.save_config()
         if lang not in self.translations:
             self.translations[lang] = self.load_translations(lang)
         self.create_menu()
@@ -290,8 +290,8 @@ class UI:
             'toolbar_enabled': self.toolbar_enabled,
             'framerate': self.framerate,
             'set_language_callback': self._set_language_callback,
-            'save_framerate_callback': self._save_framerate_callback,
-            'save_language_callback': self._save_language_callback,
+            'set_framerate_callback': self._set_framerate_callback,
+            'save_config_callback': self.save_config,
             'save_toolbar_callback': self._save_toolbar_callback
         }
         SettingsWindow(self.root, settings_context)
@@ -302,17 +302,17 @@ class UI:
         """
         self.set_language(lang_code)
 
+    def _set_framerate_callback(self, framerate):
+        """
+        Callback pour régler le framerate
+        """
+        self.framerate = framerate
+
     def _save_framerate_callback(self, framerate):
         """
         Callback pour sauvegarder le framerate
         """
         self.save_framerate(framerate)
-
-    def _save_language_callback(self, lang):
-        """
-        Callback pour sauvegarder la langue
-        """
-        self.save_language(lang)
 
     def _save_toolbar_callback(self, enabled):
         """
@@ -349,87 +349,40 @@ class UI:
         if self.toolbar:
             self.update_toolbar()
 
-    def save_folders_history(self):
+    def save_config(self):
         """
-        Sauvegarde de l'historique des dossiers chargés dans le fichier de config
+        Sauvegarde centralisée de toutes les préférences utilisateur dans config.json
         """
+        data = {
+            'folders': self.loaded_folders,
+            'language': self.language,
+            'framerate': self.framerate
+        }
         try:
             with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
-                json.dump({'folders': self.loaded_folders}, f)
+                json.dump(data, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            messagebox.showerror("Erreur", f"Erreur lors de la sauvegarde des dossiers: {e}")
+            messagebox.showerror("Erreur", f"Erreur lors de la sauvegarde de la configuration: {e}")
 
-    def load_folders_history(self):
+    def load_config(self):
         """
-        Chargement de l'historique des dossiers à partir du fichier de config
+        Charge toutes les préférences utilisateur depuis config.json
         """
+        config = {'folders': [], 'language': 'fr', 'framerate': 500}
         try:
             if os.path.exists(CONFIG_FILE):
                 with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                    self.loaded_folders = data.get('folders', [])
+                    config.update(data)
         except Exception as e:
-            messagebox.showerror("Erreur", f"Erreur lors du chargement des dossiers: {e}")
-
-    def save_language(self, lang):
-        """
-        Sauvegarde de la langue sélectionnée dans le fichier de config
-        """
-        try:
-            config = {}
-            if os.path.exists(CONFIG_FILE):
-                with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-                    config = json.load(f)
-            config['language'] = lang
-            with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
-                json.dump(config, f, ensure_ascii=False, indent=2)
-        except Exception as e:
-            messagebox.showerror("Erreur", f"Erreur lors de la sauvegarde de la langue: {e}")
-
-    def load_language(self):
-        """
-        Chargement de la langue depuis le fichier de config
-        """
-        try:
-            if os.path.exists(CONFIG_FILE):
-                with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-                    config = json.load(f)
-                    return config.get('language', 'fr')
-        except Exception:
-            pass
-        return 'fr'
-
-    def load_framerate(self):
-        """
-        Chargement du framerate depuis le fichier de config
-        """
-        try:
-            with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            return data.get('framerate', 500)
-        except Exception:
-            return 500
-
-    def save_framerate(self, framerate):
-        """
-        Sauvegarde du framerate dans le fichier de config
-        """
-        try:
-            with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        except Exception:
-            data = {}
-        data['framerate'] = framerate
-        with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+            messagebox.showerror("Erreur", f"Erreur lors du chargement de la configuration: {e}")
+        return config
 
     def on_close(self):
         """
         Actions à réaliser lors de la fermeture
         """
-        self.save_folders_history()
-        self.save_language(self.language)
-        self.save_framerate(self.framerate)
+        self.save_config()
         self.root.destroy()
 
     def update_toolbar(self):

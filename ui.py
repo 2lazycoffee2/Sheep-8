@@ -1,5 +1,6 @@
 #coding:utf8
 
+import display as disp
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import threading
@@ -9,6 +10,7 @@ import sys
 import CHIP_8 as C8
 from PIL import Image, ImageTk
 from toolbar import Toolbar
+from settings import SettingsWindow
 
 CONFIG_FILE = "config.json"
 LANG_DIR = "lang"
@@ -19,11 +21,11 @@ class UI:
         Initialisation de l'interface utilisateur
         """
         self.root = root
-        self.root.title("Sheep 8")  # Titre de la fenêtre, nom international de l'émulateur
-        self.language = self.load_language()  # Charge la langue depuis le config
+        self.root.title("Sheep 8")  #Titre de la fenêtre
+        config = self.load_config() #Chargement du fichier de config
+        self.language = config['language'] #Chargement de la langue
         self.translations = {self.language: self.load_translations(self.language)}
-        self.loaded_folders = [] # Liste des dossiers chargés précédemment
-        self.load_folders_history()
+        self.loaded_folders = config['folders'] #Liste des dossiers chargés précédemment
         self.rom_list = [] # Liste des ROMs
         self.rom_path = None # Initialisation du chemin de la ROM
         self.emulation_thread = None
@@ -32,6 +34,10 @@ class UI:
         self.stop_event = threading.Event() #Évènement d'arrêt
         self.toolbar = None
         self.toolbar_enabled = True  # Pour activer/désactiver la toolbar dynamiquement
+        self.framerate = config['framerate']  #Vitesse d'émulation
+        self.fullscreen_on_start = config.get('fullscreen_on_start', False)
+        self.bgcolor = config.get('bgcolor', (0, 0, 0))
+        self.spritecolor = config.get('spritecolor', (255, 255, 255))
         self.create_menu()
         if self.toolbar_enabled:
             self.create_toolbar()
@@ -63,7 +69,7 @@ class UI:
         Changement de la langue de l'interface utilisateur
         """
         self.language = lang
-        self.save_language(lang)
+        self.save_config()
         if lang not in self.translations:
             self.translations[lang] = self.load_translations(lang)
         self.create_menu()
@@ -101,6 +107,9 @@ class UI:
 
         #Bouton Options
         settings_menu = tk.Menu(menubar, tearoff=0)
+        settings_menu.add_command(label=t['fullscreen'], command=self.toggle_fullscreen, accelerator="F11")
+        self.root.bind('<F11>', lambda event: self.toggle_fullscreen())
+        settings_menu.add_separator()
         settings_menu.add_command(label=t['preferences'], command=self.show_settings, accelerator="Ctrl+P")
         self.root.bind('<Control-p>', lambda event: self.show_settings())
         menubar.add_cascade(label=t['menu_options'], menu=settings_menu)
@@ -128,12 +137,22 @@ class UI:
         t = self.translations[self.language]
         actions = {
             'open_rom': self.open_file,
+            'start': self.play_emulation,
+            'stop': self.stop_emulation,
+            'fullscreen': self.toggle_fullscreen,
             'preferences': self.show_settings,
             'help': self.show_help
         }
         font_path = "assets/fonts/Address Sans Pro SemiBold.ttf"
         # Création de la toolbar avec les actions et le thème
-        self.toolbar = Toolbar(self.root, lambda: t, actions, theme_bg=self.root.cget('bg'), font_path=font_path)
+        self.toolbar = Toolbar(
+            self.root,
+            lambda: t,
+            actions,
+            is_running=lambda: self.is_running,
+            theme_bg=self.root.cget('bg'),
+            font_path=font_path
+        )
         self.toolbar.toolbar.pack_forget()
         self.toolbar.toolbar.pack(side=tk.TOP, fill=tk.X, before=self.rom_listbox if self.rom_listbox else None)
 
@@ -182,7 +201,7 @@ class UI:
         if folder:
             if folder not in self.loaded_folders:
                 self.loaded_folders.append(folder) #Ajout du dossier à la liste des dossiers chargés
-            self.save_folders_history()
+            self.save_config()
             self.rom_list += [os.path.join(folder, f) for f in os.listdir(folder) if f.lower().endswith(('.ch8'))] #Ajout des ROMs du dossier à la liste
             self.update_rom_listbox()   #Mise à jour de la liste des ROMs
             if not any(f.lower().endswith('.ch8') for f in os.listdir(folder)):
@@ -223,9 +242,9 @@ class UI:
         """
         t = self.translations[self.language]
         if not self.rom_path:
-            selection = self.rom_listbox.curselection()
+            selection = self.rom_listbox.selection()
             if selection:
-                self.rom_path = self.rom_list[selection[0]]
+                self.rom_path = self.rom_list[self.rom_listbox.index(selection[0])]
         if not self.rom_path:
             messagebox.showwarning(t['help'], t['warning_no_rom'])
             return
@@ -234,6 +253,8 @@ class UI:
             self.stop_event.clear()
             self.emulation_thread = threading.Thread(target=self.run_emulator)
             self.emulation_thread.start()
+        if self.toolbar:
+            self.update_toolbar()
 
     def stop_emulation(self):
         """
@@ -243,9 +264,9 @@ class UI:
         if self.is_running:
             self.is_running = False
             self.stop_event.set()
-            if self.emulation_thread is not None:
-                self.emulation_thread.join()
-            messagebox.showinfo(t['help'], t['info_stopped'])
+            #messagebox.showinfo(t['help'], t['info_stopped'])
+            if self.toolbar:
+                self.update_toolbar()
 
     def reset_emulation(self):
         """
@@ -264,71 +285,85 @@ class UI:
         self.is_running = True
         self.emulation_thread = threading.Thread(target=self.run_emulator)
         self.emulation_thread.start()
+        if self.toolbar:
+            self.update_toolbar()
+
+    def _set_fullscreen_on_start_callback(self, enabled):
+        """
+        Callback pour sauvegarder l'option plein écran au lancement
+        """
+        self.fullscreen_on_start = enabled
+        self.save_config()
+
+    def _set_bgcolor_callback(self, rgb):
+        """
+        Callback pour changer la couleur de fond
+        """
+        self.bgcolor = rgb
+        self.save_config()
+        if hasattr(self, '_monitor') and self._monitor:
+            self._monitor.bgcolor = rgb
+
+    def _set_spritecolor_callback(self, rgb):
+        """
+        Callback pour changer la couleur des sprites
+        """
+        self.spritecolor = rgb
+        self.save_config()
+        if hasattr(self, '_monitor') and self._monitor:
+            self._monitor.spritecolor = rgb
 
     def show_settings(self):
         """
         Affichage des paramètres de l'émulateur
         """
-        t = self.translations[self.language]
+        settings_context = {
+            'translations': self.translations,
+            'language': self.language,
+            'toolbar_enabled': self.toolbar_enabled,
+            'framerate': self.framerate,
+            'fullscreen_on_start': self.fullscreen_on_start,
+            'bgcolor': getattr(self, 'bgcolor', (0, 0, 0)),
+            'spritecolor': getattr(self, 'spritecolor', (255, 255, 255)),
+            'set_language_callback': self._set_language_callback,
+            'set_framerate_callback': self._set_framerate_callback,
+            'set_fullscreen_on_start_callback': self._set_fullscreen_on_start_callback,
+            'set_bgcolor_callback': self._set_bgcolor_callback,
+            'set_spritecolor_callback': self._set_spritecolor_callback,
+            'save_config_callback': self.save_config,
+            'save_toolbar_callback': self._save_toolbar_callback
+        }
+        SettingsWindow(self.root, settings_context)
 
-        # Option pour activer/désactiver la toolbar
-        def toggle_toolbar():
-            '''
-            Fonction pour activer/désactiver la toolbar
-            '''
-            if var_toolbar.get():
-                self.toolbar_enabled = True
-                self.create_toolbar()
-            else:
-                self.toolbar_enabled = False
-                if self.toolbar:
-                    self.toolbar.destroy()
-                    self.toolbar = None
+    def _set_language_callback(self, lang_code):
+        """
+        Callback pour changer la langue
+        """
+        self.set_language(lang_code)
 
-        # Callback pour changement de langue
-        def on_language_change(event=None):
-            '''
-            Fonction de changement de langue
-            '''
-            # Récupère le code langue à partir du label sélectionné
-            selected_label = lang_var.get()
-            lang_code = label_to_code[selected_label]
-            if lang_code != self.language:
-                self.set_language(lang_code)
-                # Met à jour dynamiquement la fenêtre de paramètres
-                settings_win.destroy()
-                self.show_settings()
+    def _set_framerate_callback(self, framerate):
+        """
+        Callback pour régler le framerate
+        """
+        self.framerate = framerate
 
-        #Liste des langues disponibles (à partir des fichiers dans lang/)
-        lang_files = [f for f in os.listdir(LANG_DIR) if f.endswith('.json')]
-        available_langs = [f[:-5] for f in lang_files]
-        # Mapping code -> label traduit
-        code_to_label = {code: self.load_translations(code).get('language_name', code) for code in available_langs}
-        label_to_code = {v: k for k, v in code_to_label.items()}
-        labels = [code_to_label[code] for code in available_langs]
-        #Label courant
-        current_label = code_to_label.get(self.language, self.language)
+    def _save_framerate_callback(self, framerate):
+        """
+        Callback pour sauvegarder le framerate
+        """
+        self.save_framerate(framerate)
 
-        #Création de la fenêtre de paramètres
-        settings_win = tk.Toplevel(self.root)
-        settings_win.title(t['settings'])
-        settings_win.geometry('350x200')
-
-        #Toolbar checkbox
-        var_toolbar = tk.BooleanVar(value=self.toolbar_enabled)
-        cb = ttk.Checkbutton(settings_win, text=t.get('show_toolbar', t['show_toolbar']), variable=var_toolbar, command=toggle_toolbar)
-        cb.pack(pady=20) #Padding entre la checkbox et le haut de la fenêtre
-
-        # Sélecteur de langue
-        tk.Label(settings_win, text=t['language']).pack(pady=(5,0))
-        lang_var = tk.StringVar(value=current_label)
-        lang_combo = ttk.Combobox(settings_win, textvariable=lang_var, values=labels, state="readonly")
-        lang_combo.pack(pady=5)
-        lang_combo.bind('<<ComboboxSelected>>', on_language_change)
-
-        #tk.Label(settings_win, text=t['settings_msg']).pack(pady=10)
-
-        ttk.Button(settings_win, text="OK", command=settings_win.destroy).pack(pady=10)
+    def _save_toolbar_callback(self, enabled):
+        """
+        Callback pour sauvegarder l'état de la toolbar
+        """
+        self.toolbar_enabled = enabled
+        if enabled:
+            self.create_toolbar()
+        else:
+            if self.toolbar:
+                self.toolbar.destroy()
+                self.toolbar = None
 
     def show_help(self):
         """
@@ -344,67 +379,88 @@ class UI:
         t = self.translations[self.language]
         messagebox.showinfo(t['about'], t['about_msg'])
 
+    def _monitor_factory(self):
+        """
+        Factory pour créer un objet Display
+        """
+        self._monitor = disp.Display()
+        self._monitor.bgcolor = getattr(self, 'bgcolor', (0, 0, 0))
+        self._monitor.spritecolor = getattr(self, 'spritecolor', (255, 255, 255))
+        return self._monitor
+
     def run_emulator(self):
         """
         Exécution de l'émulateur
         """
-        C8.run(self.rom_path, self.stop_event)
-        self.is_running = False # Quand la fenêtre de jeu se ferme, le statut de l'émulation est mis à jour
+        self._fullscreen_toggle_requested = threading.Event()
+        C8.run(
+            self.rom_path,
+            self.stop_event,
+            self.framerate,
+            fullscreen=self.fullscreen_on_start,
+            monitor_factory=self._monitor_factory,
+            fullscreen_toggle_event=self._fullscreen_toggle_requested
+        )
+        self.is_running = False
+        if self.toolbar:
+            self.update_toolbar()
 
-    def save_folders_history(self):
+    def toggle_fullscreen(self):
         """
-        Sauvegarde de l'historique des dossiers chargés dans le fichier de config
+        Demande à l'émulateur de basculer en mode plein écran
         """
+        if hasattr(self, '_fullscreen_toggle_requested') and self._fullscreen_toggle_requested is not None:
+            self._fullscreen_toggle_requested.set()
+        else:
+            messagebox.showinfo("Info", "L'émulation doit être lancée pour activer le plein écran.")
+
+    def save_config(self):
+        """
+        Sauvegarde centralisée de toutes les préférences utilisateur dans config.json
+        """
+        data = {
+            'folders': self.loaded_folders,
+            'language': self.language,
+            'framerate': self.framerate,
+            'fullscreen_on_start': getattr(self, 'fullscreen_on_start', False),
+            'bgcolor': getattr(self, 'bgcolor', (0, 0, 0)),
+            'spritecolor': getattr(self, 'spritecolor', (255, 255, 255))
+        }
         try:
             with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
-                json.dump({'folders': self.loaded_folders}, f)
+                json.dump(data, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            messagebox.showerror("Erreur", f"Erreur lors de la sauvegarde des dossiers: {e}")
+            messagebox.showerror("Erreur", f"Erreur lors de la sauvegarde de la configuration: {e}")
 
-    def load_folders_history(self):
+    def load_config(self):
         """
-        Chargement de l'historique des dossiers à partir du fichier de config
+        Charge toutes les préférences utilisateur depuis config.json
         """
+        config = {'folders': [], 'language': 'fr', 'framerate': 500, 'fullscreen_on_start': False, 'bgcolor': (0, 0, 0), 'spritecolor': (255, 255, 255)}
         try:
             if os.path.exists(CONFIG_FILE):
                 with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                    self.loaded_folders = data.get('folders', [])
+                    config.update(data)
         except Exception as e:
-            messagebox.showerror("Erreur", f"Erreur lors du chargement des dossiers: {e}")
-
-    def save_language(self, lang):
-        """
-        Sauvegarde de la langue sélectionnée dans le fichier de config
-        """
-        try:
-            config = {}
-            if os.path.exists(CONFIG_FILE):
-                with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-                    config = json.load(f)
-            config['language'] = lang
-            with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
-                json.dump(config, f)
-        except Exception as e:
-            messagebox.showerror("Erreur", f"Erreur lors de la sauvegarde de la langue: {e}")
-
-    def load_language(self):
-        """
-        Chargement de la langue depuis le fichier de config
-        """
-        try:
-            if os.path.exists(CONFIG_FILE):
-                with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-                    config = json.load(f)
-                    return config.get('language', 'fr')
-        except Exception:
-            pass
-        return 'fr'
+            messagebox.showerror("Erreur", f"Erreur lors du chargement de la configuration: {e}")
+        return config
 
     def on_close(self):
-        self.save_folders_history()
-        self.save_language(self.language)
+        """
+        Actions à réaliser lors de la fermeture
+        """
+        self.save_config()
         self.root.destroy()
+
+    def update_toolbar(self):
+        """
+        Mise à jour de la toolbar
+        """
+        if self.toolbar and hasattr(self.toolbar, 'toolbar'):
+            self.toolbar.update()
+            self.toolbar.toolbar.pack_forget()
+            self.toolbar.toolbar.pack(side=tk.TOP, fill=tk.X, before=self.rom_listbox if self.rom_listbox else None)
 
 if __name__ == "__main__":
     root = tk.Tk()

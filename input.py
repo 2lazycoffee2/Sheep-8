@@ -7,8 +7,7 @@ class Input :
     def __init__(self) :
         
         
-        self.keypad = [0]*16
-        self.key_is_pressed =[]
+        self.keypad = [0]*16            # Le pad du COSMAC VIP Utilise 16 touches. On le modélise par une matrice 1x16.
         self.key_map ={ 
            ga.K_1 :   0x0,
            ga.K_2 :   0x1, 

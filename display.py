@@ -25,8 +25,6 @@ class Display:
         self.bgcolor =  (0, 0, 0)
         self.spritecolor = (255, 255, 255)
 
-        #self.Win_buffer = Win_buffer
-
     
 
     def Draw_pixel(self, Win_buffer):
@@ -36,12 +34,12 @@ class Display:
         """
 
         for i in range(self.height):
-            for j in range(self.width):
+            for j in range(self.width):             # Ces deux boucles parcourent toute les cellules de la matrice win_buffer
                 if Win_buffer[j][i] == 1:
-                    ga.draw.rect(self.Window, self.spritecolor, [i*self.scale,j*self.scale, self.scale, self.scale], 0)
+                    ga.draw.rect(self.Window, self.spritecolor, [i*self.scale,j*self.scale, self.scale, self.scale], 0) # Si un des coefficients de la matrice est à un, on allume un pixel de la couleur voulue) 
                 else:
-                    ga.draw.rect(self.Window, self.bgcolor, [i*self.scale,j*self.scale, self.scale, self.scale], 0)
-        ga.display.update()
+                    ga.draw.rect(self.Window, self.bgcolor, [i*self.scale,j*self.scale, self.scale, self.scale], 0)     # Sinon, on dessine un pixel noir.
+        ga.display.update () # rafraichissement.
 
     def set_fullscreen(self, enabled: bool):
         """

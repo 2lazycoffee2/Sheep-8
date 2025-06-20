@@ -1,5 +1,7 @@
 #coding:utf8
 
+import ttkbootstrap as tb
+from ttkbootstrap.constants import *
 import display as disp
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
@@ -33,11 +35,14 @@ class UI:
         self.rom_listbox = None
         self.stop_event = threading.Event() #Évènement d'arrêt
         self.toolbar = None
-        self.toolbar_enabled = True  # Pour activer/désactiver la toolbar dynamiquement
+        self.toolbar_enabled = config.get('toolbar_enabled', True)  # Pour activer/désactiver la toolbar dynamiquement
         self.framerate = config['framerate']  #Vitesse d'émulation
-        self.fullscreen_on_start = config.get('fullscreen_on_start', False)
-        self.bgcolor = config.get('bgcolor', (0, 0, 0))
-        self.spritecolor = config.get('spritecolor', (255, 255, 255))
+        self.fullscreen_on_start = config.get('fullscreen_on_start', False) #Plein écran au démarrage
+        self.bgcolor = config.get('bgcolor', (0, 0, 0)) #Couleur des pixels "éteints"
+        self.spritecolor = config.get('spritecolor', (255, 255, 255)) #Couleur des pixels "allumés"
+        self.theme = config.get('theme', 'superhero') #Thème de l'interface
+        self.toolbar_layout = config.get('toolbar_layout', 'left') #Disposition de la toolbar
+        self.set_theme(self.theme) #Définition du thème
         self.create_menu()
         if self.toolbar_enabled:
             self.create_toolbar()
@@ -48,6 +53,20 @@ class UI:
             if os.path.isdir(folder):
                 self.rom_list += [os.path.join(folder, f) for f in os.listdir(folder) if f.lower().endswith(('.ch8'))]
         self.update_rom_listbox()
+
+    def set_theme(self, theme):
+        """
+        Définit le thème de l'interface utilisateur et le sauvegarde
+        """
+        #print(f"[DEBUG] set_theme called with: {theme}")
+        try:
+            self.root.style.theme_use(theme) #Application du thème
+            self.theme = theme #Synchronisation de l'attribut
+            self.save_config()
+        except Exception:
+            self.root.style.theme_use("superhero") #Thème par défaut
+            self.theme = "superhero"
+            self.save_config()
 
     def load_translations(self, lang):
         """
@@ -84,8 +103,8 @@ class UI:
         
         #Bouton Fichier
         t = self.translations[self.language]
-        menubar= tk.Menu(self.root)
-        file_menu = tk.Menu(menubar, tearoff=0)
+        menubar = tb.Menu(self.root)
+        file_menu = tb.Menu(menubar, tearoff=0)
         file_menu.add_command(label=t['open_rom'], command=self.open_file, accelerator="Ctrl+O")
         self.root.bind('<Control-o>', lambda event: self.open_file())
         file_menu.add_command(label=t['open_folder'], command=self.open_folder, accelerator="Ctrl+Shift+O")
@@ -96,7 +115,7 @@ class UI:
         menubar.add_cascade(label=t['menu_file'], menu=file_menu)
 
         #Bouton Contrôle
-        control_menu = tk.Menu(menubar, tearoff=0)
+        control_menu = tb.Menu(menubar, tearoff=0)
         control_menu.add_command(label=t['start'], command=self.play_emulation, accelerator="F5")
         self.root.bind('<F5>', lambda event: self.play_emulation())
         control_menu.add_command(label=t['stop'], command=self.stop_emulation, accelerator="F6")
@@ -106,7 +125,7 @@ class UI:
         menubar.add_cascade(label=t['menu_control'], menu=control_menu)
 
         #Bouton Options
-        settings_menu = tk.Menu(menubar, tearoff=0)
+        settings_menu = tb.Menu(menubar, tearoff=0)
         settings_menu.add_command(label=t['fullscreen'], command=self.toggle_fullscreen, accelerator="F11")
         self.root.bind('<F11>', lambda event: self.toggle_fullscreen())
         settings_menu.add_separator()
@@ -115,7 +134,7 @@ class UI:
         menubar.add_cascade(label=t['menu_options'], menu=settings_menu)
 
         #Bouton Aide
-        help_menu = tk.Menu(menubar, tearoff=0)
+        help_menu = tb.Menu(menubar, tearoff=0)
         help_menu.add_command(label=t['help'], command=self.show_help, accelerator="F1")
         self.root.bind('<F1>', lambda event: self.show_help())
         help_menu.add_command(label=t['about'], command=self.show_about, accelerator="F2")
@@ -151,10 +170,11 @@ class UI:
             actions,
             is_running=lambda: self.is_running,
             theme_bg=self.root.cget('bg'),
-            font_path=font_path
+            font_path=font_path,
+            layout=self.toolbar_layout
         )
         self.toolbar.toolbar.pack_forget()
-        self.toolbar.toolbar.pack(side=tk.TOP, fill=tk.X, before=self.rom_listbox if self.rom_listbox else None)
+        self.toolbar.toolbar.pack(side=tb.TOP, fill=tb.X, before=self.rom_listbox if self.rom_listbox else None)
 
     def create_rom_listbox(self):
         """
@@ -165,14 +185,14 @@ class UI:
         # Si la listbox existe déjà, on la détruit pour la recréer avec les bons headers
         if self.rom_listbox is not None:
             self.rom_listbox.destroy()
-        self.rom_listbox = ttk.Treeview(self.root, columns=columns, show='headings')
+        self.rom_listbox = tb.Treeview(self.root, columns=columns, show='headings', bootstyle="info")
         self.rom_listbox.heading('name', text=t.get('name', 'Nom'))
         # Ajout de l'unité à la taille
         size_unit = t.get('size_unit', 'o')
         self.rom_listbox.heading('size', text=f"{t.get('size', 'Taille')} ({size_unit})")
         self.rom_listbox.column('name', width=300, anchor='w')
         self.rom_listbox.column('size', width=100, anchor='w')
-        self.rom_listbox.pack(fill=tk.BOTH, expand=True) #Ajustement de la taille de la liste à la fenêtre
+        self.rom_listbox.pack(fill=tb.BOTH, expand=True) #Ajustement de la taille de la liste à la fenêtre
         self.rom_listbox.bind('<Double-1>', self.on_rom_double_click) #Double-clic pour charger la ROM
         self.rom_listbox.bind('<Return>', self.on_rom_double_click) #Appui sur Entrée pour charger la ROM
         self.update_rom_listbox()
@@ -325,15 +345,28 @@ class UI:
             'fullscreen_on_start': self.fullscreen_on_start,
             'bgcolor': getattr(self, 'bgcolor', (0, 0, 0)),
             'spritecolor': getattr(self, 'spritecolor', (255, 255, 255)),
+            'theme': self.theme,
             'set_language_callback': self._set_language_callback,
             'set_framerate_callback': self._set_framerate_callback,
             'set_fullscreen_on_start_callback': self._set_fullscreen_on_start_callback,
             'set_bgcolor_callback': self._set_bgcolor_callback,
             'set_spritecolor_callback': self._set_spritecolor_callback,
+            'set_theme_callback': self.set_theme,
             'save_config_callback': self.save_config,
-            'save_toolbar_callback': self._save_toolbar_callback
+            'save_toolbar_callback': self._save_toolbar_callback,
+            'set_toolbar_layout_callback': self._set_toolbar_layout_callback,
+            'toolbar_layout': self.toolbar_layout
         }
         SettingsWindow(self.root, settings_context)
+
+    def _set_toolbar_layout_callback(self, layout):
+        """
+        Callback pour changer la disposition de la toolbar
+        """
+        self.toolbar_layout = layout
+        if self.toolbar:
+            self.create_toolbar()
+        self.save_config()
 
     def _set_language_callback(self, lang_code):
         """
@@ -424,7 +457,10 @@ class UI:
             'framerate': self.framerate,
             'fullscreen_on_start': getattr(self, 'fullscreen_on_start', False),
             'bgcolor': getattr(self, 'bgcolor', (0, 0, 0)),
-            'spritecolor': getattr(self, 'spritecolor', (255, 255, 255))
+            'spritecolor': getattr(self, 'spritecolor', (255, 255, 255)),
+            'theme': getattr(self, 'theme', 'superhero'),
+            'toolbar_layout': getattr(self, 'toolbar_layout', 'left'),
+            'toolbar_enabled': self.toolbar_enabled
         }
         try:
             with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
@@ -436,7 +472,7 @@ class UI:
         """
         Charge toutes les préférences utilisateur depuis config.json
         """
-        config = {'folders': [], 'language': 'fr', 'framerate': 500, 'fullscreen_on_start': False, 'bgcolor': (0, 0, 0), 'spritecolor': (255, 255, 255)}
+        config = {'folders': [], 'language': 'fr', 'framerate': 500, 'fullscreen_on_start': False, 'bgcolor': (0, 0, 0), 'spritecolor': (255, 255, 255), 'theme': 'superhero'}
         try:
             if os.path.exists(CONFIG_FILE):
                 with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
@@ -460,10 +496,10 @@ class UI:
         if self.toolbar and hasattr(self.toolbar, 'toolbar'):
             self.toolbar.update()
             self.toolbar.toolbar.pack_forget()
-            self.toolbar.toolbar.pack(side=tk.TOP, fill=tk.X, before=self.rom_listbox if self.rom_listbox else None)
+            self.toolbar.toolbar.pack(side=tb.TOP, fill=tb.X, before=self.rom_listbox if self.rom_listbox else None)
 
 if __name__ == "__main__":
-    root = tk.Tk()
+    root = tb.Window(themename="superhero")
     if sys.platform.startswith('win'):
         root.iconbitmap("assets/icon/icon.ico")
     else:

@@ -36,5 +36,9 @@
     "fullscreen_on_start": "Lancer les jeux en plein écran",
     "bgcolor": "Couleur de fond",
     "spritecolor": "Couleur des sprites",
-    "restore_defaults": "Restaurer les valeurs par défaut"
+    "restore_defaults": "Restaurer les valeurs par défaut",
+    "theme": "Thème",
+    "toolbar_layout": "Disposition de la toolbar",
+    "toolbar_layout_left": "Petites icônes à gauche",
+    "toolbar_layout_top": "Icônes moyennes au-dessus"
 }

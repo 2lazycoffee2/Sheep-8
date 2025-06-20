@@ -36,5 +36,9 @@
     "fullscreen_on_start": "Launch games in fullscreen",
     "bgcolor": "Background color",
     "spritecolor": "Sprite color",
-    "restore_defaults": "Restore defaults"
+    "restore_defaults": "Restore defaults",
+    "theme": "Theme",
+    "toolbar_layout": "Toolbar layout",
+    "toolbar_layout_left": "Small icons on the left",
+    "toolbar_layout_top": "Medium icons on top"
 }

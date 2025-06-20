@@ -15,7 +15,7 @@
     "settings": "Paramètres",
     "settings_msg": "Aucune option configurable pour le moment. Restez à l'écoute des prochaines mises à jour :) !",
     "help_msg": "Bienvenue dans Sheep 8 !\n\nPour démarrer l'émulation, ouvrez une ROM en utilisant le menu Fichier.\nUtilisez le menu Contrôle pour démarrer ou arrêter l'émulation.\nPour toute autre question, consultez la documentation.",
-    "about_msg": "Sheep 8 - Émulateur CHIP-8\n\nDéveloppé par 2LazyCoffee2 et TortipOOF\nVersion beta 0.2.0\nPour plus d'informations, consultez le dépôt GitHub.",
+    "about_msg": "Sheep 8 - Émulateur CHIP-8\n\nDéveloppé par 2LazyCoffee2 et TortipOOF\nVersion 1.1.0\nPour plus d'informations, consultez le dépôt GitHub.",
     "no_roms_in_folder": "Aucune ROM .ch8 trouvée dans le dossier sélectionné. Vérifiez le dossier sélectionné ou son contenu.",
     "filetypes": [["ROMs Chip-8", "*.ch8;*.chip8"], ["All files", "*.*"]],
     "choose_folder": "Choisir le dossier des ROMs",

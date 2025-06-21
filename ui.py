@@ -6,6 +6,8 @@ import display as disp
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import threading
+from pypresence import Presence  # Pour la présence Discord
+import time
 import json
 import os
 import sys
@@ -14,8 +16,26 @@ from PIL import Image, ImageTk
 from toolbar import Toolbar
 from settings import SettingsWindow
 
-CONFIG_FILE = "config.json"
-LANG_DIR = "lang"
+def get_config_path():
+    """
+    Retourne le chemin du fichier de configuration selon l'OS (Windows, Linux, macOS)
+    """
+    appname = "Sheep8"
+    if sys.platform.startswith('win'):
+        # Windows
+        appdata = os.getenv('APPDATA') or os.path.expanduser('~')
+        config_dir = os.path.join(appdata, appname)
+    elif sys.platform.startswith('darwin'):
+        # macOS
+        config_dir = os.path.join(os.path.expanduser('~/Library/Application Support'), appname)
+    else:
+        # Linux
+        config_dir = os.path.join(os.path.expanduser('~/.config'), appname)
+    os.makedirs(config_dir, exist_ok=True)
+    return os.path.join(config_dir, 'config.json')
+
+CONFIG_FILE = get_config_path()  #Chemin du fichier de configuration
+LANG_DIR = "lang" #Dossier des dictionnaires de traduction
 
 class UI:
     def __init__(self, root):
@@ -53,6 +73,61 @@ class UI:
             if os.path.isdir(folder):
                 self.rom_list += [os.path.join(folder, f) for f in os.listdir(folder) if f.lower().endswith(('.ch8'))]
         self.update_rom_listbox()
+        # Initialisation de la présence Discord
+        self.discord_connected = False
+        self.rpc = None
+        self.discord_start_time = None
+        self.discord_client_id = "1385527884923535433"  #ID de l'application Discord
+        self._init_discord_rpc()
+
+    def _init_discord_rpc(self):
+        """
+        Initialisation de la présence Discord
+        """
+        try:
+            self.rpc = Presence(self.discord_client_id)
+            self.rpc.connect()
+            self.discord_connected = True
+            self.discord_start_time = int(time.time())
+            self.update_discord_presence()
+        except Exception as e:
+            print(f"[DEBUG] Erreur lors de l'initialisation de la présence Discord: {e}")
+            self.discord_connected = False
+
+    def update_discord_presence(self, state=None):
+        """
+        Mise à jour de la présence Discord
+        """
+        if not self.discord_connected or not self.rpc:
+            return
+        try:
+            if self.is_running:
+                state = "En cours d'émulation" if state is None else state
+                details = f"Joue à {os.path.basename(self.rom_path)}" if self.rom_path else "Aucune ROM chargée"
+            else:
+                state = "En attente" if state is None else state
+                details = "Aucune ROM chargée"
+            self.rpc.update(
+                state=state,
+                details=details,
+                start=self.discord_start_time,
+                large_image="sheep",
+                small_image="play"
+            )
+        except Exception as e:
+            print(f"[DEBUG] Erreur lors de la mise à jour de la présence Discord: {e}")
+
+    def clear_discord_presence(self):
+        """
+        Efface la présence Discord
+        """
+        if self.discord_connected and self.rpc:
+            try:
+                self.rpc.clear()
+            except Exception as e:
+                print(f"[DEBUG] Erreur lors de l'effacement de la présence Discord: {e}")
+            finally:
+                self.discord_connected = False
 
     def set_theme(self, theme):
         """
@@ -211,6 +286,7 @@ class UI:
             self.update_rom_listbox()     #Mise à jour de la liste des ROMs pour afficher la ROM sélectionnée
             self.rom_path = path
             self.play_emulation()
+            self.update_discord_presence(state="En jeu")
 
     def open_folder(self):
         """
@@ -255,6 +331,7 @@ class UI:
         if selected:
             self.rom_path = self.rom_list[self.rom_listbox.index(selected[0])]
             self.play_emulation()
+            self.update_discord_presence(state="En jeu")
 
     def play_emulation(self):
         """
@@ -273,6 +350,8 @@ class UI:
             self.stop_event.clear()
             self.emulation_thread = threading.Thread(target=self.run_emulator)
             self.emulation_thread.start()
+            self.discord_start_time = int(time.time())
+            self.update_discord_presence(state="En jeu")
         if self.toolbar:
             self.update_toolbar()
 
@@ -284,6 +363,7 @@ class UI:
         if self.is_running:
             self.is_running = False
             self.stop_event.set()
+            self.update_discord_presence(state="Menu principal - Aucune ROM chargée")
             #messagebox.showinfo(t['help'], t['info_stopped'])
             if self.toolbar:
                 self.update_toolbar()
@@ -437,6 +517,7 @@ class UI:
         self.is_running = False
         if self.toolbar:
             self.update_toolbar()
+        self.update_discord_presence(state="Menu principal")
 
     def toggle_fullscreen(self):
         """
@@ -488,6 +569,12 @@ class UI:
         """
         self.save_config()
         self.root.destroy()
+        self.clear_discord_presence()
+        if self.rpc:
+            try:
+                self.rpc.close()
+            except Exception as e:
+                pass
 
     def update_toolbar(self):
         """

@@ -16,8 +16,26 @@ from PIL import Image, ImageTk
 from toolbar import Toolbar
 from settings import SettingsWindow
 
-CONFIG_FILE = "config.json"
-LANG_DIR = "lang"
+def get_config_path():
+    """
+    Retourne le chemin du fichier de configuration selon l'OS (Windows, Linux, macOS)
+    """
+    appname = "Sheep8"
+    if sys.platform.startswith('win'):
+        # Windows
+        appdata = os.getenv('APPDATA') or os.path.expanduser('~')
+        config_dir = os.path.join(appdata, appname)
+    elif sys.platform.startswith('darwin'):
+        # macOS
+        config_dir = os.path.join(os.path.expanduser('~/Library/Application Support'), appname)
+    else:
+        # Linux
+        config_dir = os.path.join(os.path.expanduser('~/.config'), appname)
+    os.makedirs(config_dir, exist_ok=True)
+    return os.path.join(config_dir, 'config.json')
+
+CONFIG_FILE = get_config_path()  #Chemin du fichier de configuration
+LANG_DIR = "lang" #Dossier des dictionnaires de traduction
 
 class UI:
     def __init__(self, root):
@@ -499,6 +517,7 @@ class UI:
         self.is_running = False
         if self.toolbar:
             self.update_toolbar()
+        self.update_discord_presence(state="Menu principal")
 
     def toggle_fullscreen(self):
         """

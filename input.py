@@ -2,14 +2,12 @@
 import pygame as ga
 class Input : 
     """
-    pour l'instant, faire sans, directement sur le processseur.
-    Classe qui servira au entrées utilisateurs.
+    Classe qui sert d'entrées utilisateurs.
     """
     def __init__(self) :
         
         
-        self.keypad = [0]*16
-        self.key_is_pressed =[]
+        self.keypad = [0]*16            # Le pad du COSMAC VIP Utilise 16 touches. On le modélise par une matrice 1x16.
         self.key_map ={ 
            ga.K_1 :   0x0,
            ga.K_2 :   0x1, 
@@ -35,6 +33,10 @@ class Input :
    
    
     def update(self, events):
+        """
+        Mise à jour des touches
+        sont-elles pressées ou non.
+        """
         for event in events: 
             if event.type == ga.KEYDOWN:
                 if event.key in self.key_map:

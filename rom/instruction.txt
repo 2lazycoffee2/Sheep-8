@@ -1,0 +1,3 @@
+#----//INSTRUCTIOINS :----#
+
+Le repertoire rom/ doit contenire l'ensemble des roms auxquels vous voulez jouer. Pour le bon fonctionnement de l'émulateur, vos roms doivent être renseigné au format ".ch8".

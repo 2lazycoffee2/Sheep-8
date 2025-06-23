@@ -11,7 +11,7 @@ class Input :
         self.key_map ={ 
         #  Chaque touches du clavier correspond à une valeur hexadécimal envoyé au cpu.  
            ga.K_1 :   0x1,
-           ga.K_2 :   0x2, 
+           ga.K_2 :   0x2,
            ga.K_3 :   0x3, 
            ga.K_4 :   0xc,
 
@@ -28,7 +28,10 @@ class Input :
            ga.K_w :   0xa, 
            ga.K_x :   0x0, 
            ga.K_c :   0xb,
-           ga.K_v :   0xf 
+           ga.K_v :   0xf, 
+
+           223    :   0x2               # Pour une raion que l'on ignore, pygame veut impérativement que l'on utilise SHIFT + 2 mais sous windows, 223 évite celà (mais pas sur linux...)
+
         }
 
    

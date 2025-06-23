@@ -44,7 +44,7 @@ Pour les utilisateurs Linux, récupérez
 
 Ainsi, vous pourrez pleinement profiter de l'émulateur sous Linux.
 
-# JEUX : 
+## JEUX : 
 
 Assurez vous que les jeux que vous crée ou récupéré soient compatible avec le CHIP 8 classique et, par préférence, ajoutez-y la l'extensions `.ch8`. Si vous avez un doute sur la compatibilité
 de vos roms, nous vous renvoyons sur les documentations citées dans les remerciements pour s'assurer que vos roms fonctionnent bien avec notre émulateur. 

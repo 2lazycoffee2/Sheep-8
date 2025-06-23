@@ -14,7 +14,7 @@
     "warning_no_rom_reset": "ROMが選択されていません。エミュレーションをリセットできません。",
     "settings": "設定",
     "settings_msg": "現在、設定可能なオプションはありません。今後のアップデートをお楽しみに！",
-    "help_msg": "Sheep 8へようこそ！\n\nエミュレーションを開始するには、ファイルメニューからROMを開いてください。\nコントロールメニューでエミュレーションの開始や停止ができます。\nその他の質問はドキュメントをご覧ください。",
+    "help_msg": "Sheep 8へようこそ！\n\nエミュレーションを開始するには、ファイルメニューからROMを開いてください。\nコントロールメニューでエミュレーションの開始や停止ができます。\nツールバーからもこれらのコマンドにアクセスできます。",
     "about_msg": "Sheep 8 - CHIP-8エミュレータ\n\n開発者: 2LazyCoffee2 と TortipOOF\nベータ版 1.1.1\n詳細はGitHubリポジトリをご覧ください。",
     "no_roms_in_folder": "選択したフォルダーに.ch8 ROMが見つかりません。フォルダーや内容を確認してください。",
     "filetypes": [["Chip-8 ROM", "*.ch8;*.chip8"], ["すべてのファイル", "*.*"]],
@@ -40,5 +40,15 @@
     "theme": "テーマ",
     "toolbar_layout": "ツールバーのレイアウト",
     "toolbar_layout_left": "左に小さなアイコン",
-    "toolbar_layout_top": "上に中くらいのアイコン"
+    "toolbar_layout_top": "中サイズのアイコンを上部に表示",
+    "help_keys_assignation": "キー割り当て：",
+    "help_chip8keys": "CHIP-8のキーボードは4×4のキーで構成されており、\nその配置は右図に示されています。",
+    "help_chip8tokeyboard": "これらのキーはエミュレータ上で1234/AZER/QSDF/WXCVに割り当てられています。",
+    "help_keyboard_shortcuts": "主なキーボードショートカット：",
+    "help_key_F5": "F5：エミュレーション開始",
+    "help_key_F6": "F6：エミュレーション停止（ゲーム中でも使用可能）",
+    "help_key_F11": "F11：フルスクリーンモード",
+    "help_morekeys": "詳細はGitHubのドキュメントをご覧ください。",
+    "about_title": "Sheep 8",
+    "about_desc": "Sheep 8は2LazyCoffee2とTortipOOFが\nポリテック・ディジョンの学業プロジェクトの一環として開発したCHIP-8エミュレータです。\n\nリリース: https://github.com/2LazyCoffee2/Python_Project/releases\nドキュメント: https://github.com/2LazyCoffee2/Python_Project/wiki\nこのソフトウェアはオープンソースです。ご質問があればご連絡ください。"
 }

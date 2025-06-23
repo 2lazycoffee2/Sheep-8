@@ -14,7 +14,7 @@
     "warning_no_rom_reset": "Aucune ROM sélectionnée. Impossible de réinitialiser l'émulation.",
     "settings": "Paramètres",
     "settings_msg": "Aucune option configurable pour le moment. Restez à l'écoute des prochaines mises à jour :) !",
-    "help_msg": "Bienvenue dans Sheep 8 !\n\nPour démarrer l'émulation, ouvrez une ROM en utilisant le menu Fichier.\nUtilisez le menu Contrôle pour démarrer ou arrêter l'émulation.\nPour toute autre question, consultez la documentation.",
+    "help_msg": "Bienvenue dans Sheep 8 !\n\nPour démarrer l'émulation, ouvrez une ROM en utilisant le menu Fichier.\nUtilisez le menu Contrôle pour démarrer ou arrêter l'émulation.\nVous pouvez également accéder à ces commandes via la barre d'outils.",
     "about_msg": "Sheep 8 - Émulateur CHIP-8\n\nDéveloppé par 2LazyCoffee2 et TortipOOF\nVersion 1.1.1\nPour plus d'informations, consultez le dépôt GitHub.",
     "no_roms_in_folder": "Aucune ROM .ch8 trouvée dans le dossier sélectionné. Vérifiez le dossier sélectionné ou son contenu.",
     "filetypes": [["ROMs Chip-8", "*.ch8;*.chip8"], ["All files", "*.*"]],
@@ -40,5 +40,15 @@
     "theme": "Thème",
     "toolbar_layout": "Disposition de la barre d'outils",
     "toolbar_layout_left": "Petites icônes à gauche",
-    "toolbar_layout_top": "Icônes moyennes en haut"
+    "toolbar_layout_top": "Icônes moyennes en haut",
+    "help_keys_assignation": "Assignation des touches :",
+    "help_chip8keys": "Le clavier du CHIP-8 est composé de 4 par 4 touches,\ndont l'agencement est détaillé sur l'image ci-contre",
+    "help_chip8tokeyboard": "Ces touches sont mappées sur 1234/AZER/QSDF/WXCV dans l'émulateur.",
+    "help_keyboard_shortcuts": "Principaux raccourcis clavier :",
+    "help_key_F5": "F5 : Lancer l'émulation",
+    "help_key_F6": "F6 : Stopper l'émulation (utilisable in-game)",
+    "help_key_F11": "F11 : Mode plein écran",
+    "help_morekeys": "Pour plus de détails, consultez la documentation sur GitHub.",
+    "about_title": "Sheep 8",
+    "about_desc": "Émulateur CHIP-8 développé par 2LazyCoffee2 et TortipOOF\ndans le cadre d'un projet d'études à Polytech Dijon.\n\nReleases : https://github.com/2LazyCoffee2/Python_Project/releases\nDocumentation : https://github.com/2LazyCoffee2/Python_Project/wiki\nCe logiciel est open-source. Pour toutes questions supplémentaires, contactez-nous."
 }

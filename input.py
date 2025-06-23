@@ -12,7 +12,8 @@ class Input :
         self.key_is_pressed =[]
         self.key_map ={ 
            ga.K_1 :   0x0,
-           ga.K_2 :   0x1, 
+           ga.K_2 :   0x1,
+           233    :   0x1, #Caractère é en AZERTY
            ga.K_3 :   0x2, 
            ga.K_4 :   0x3,
 

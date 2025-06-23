@@ -46,7 +46,7 @@ class CPU:
                         0xF0, 0x80, 0x80, 0x80, 0xF0, #// C
                         0xE0, 0x90, 0x90, 0x90, 0xE0, #// D
                         0xF0, 0x80, 0xF0, 0x80, 0xF0, #// E
-                        0xF0, 0x80, 0xF0, 0x80, 0x80]  #// F}
+                        0xF0, 0x80, 0xF0, 0x80, 0x80] #// F}
             
             for cells in range(len(font_data)) :                     # On charge cette table dans la mémoire (de 0x0 à 0x200).
                 self.memory[cells] = font_data[cells]
@@ -98,17 +98,17 @@ class CPU:
             le buffer et le renverra à 
             la class display qui s'occupe du reste.
             """
-            self.VX[0xF] = 0
+            self.VX[0xF] = 0                                    # Carry flag mis à 0.
 
-            for line in range(N):                               
-                Sprite_Byte = self.memory[self.Index + line]
-                for colone in range(8):
+            for line in range(N):                               # pour N lignes
+                Sprite_Byte = self.memory[self.Index + line]    # Stockage du sprite 
+                for colone in range(8):                         # Pour 8 bits
 
-                    px = (Sprite_Byte >> (7 - colone)) & 1
-                    x_pos = (self.VX[X] + colone) % 64
-                    y_pos = (self.VX[Y] + line) % 32
+                    px = (Sprite_Byte >> (7 - colone)) & 1      # On isole le pixel du spryte
+                    x_pos = (self.VX[X] + colone) % 64          # attribution de la position x.
+                    y_pos = (self.VX[Y] + line) % 32            # attribution de la position y.
             
-                    if px ==1 :
+                    if px ==1 :                                 # On map le buffer.
                         if self.Win_buffer[y_pos][x_pos] == 1 : 
                             self.VX[0xF] = 1
                         self.Win_buffer[y_pos][x_pos] ^=1                   # On Xor les coordonnées afin d'éviter les dépassements dans le buffer.  
@@ -201,7 +201,7 @@ class CPU:
                 elif Nug4 == 0x3: #xor               #8XY3
                     self.VX[X] ^= self.VX[Y]                
 
-                elif Nug4 == 0x4:  #sum              #8XY4
+                elif Nug4 == 0x4:  #addition              #8XY4
                     
                     tmp_sum = self.VX[X] + self.VX[Y]
 
@@ -211,7 +211,7 @@ class CPU:
                     else :
                         self.VX[0xF] = 0
 
-                elif Nug4 == 0x5:   #sub              #8XY5     
+                elif Nug4 == 0x5:   #soustraction            #8XY5     
                     tempvx = self.VX[X] 
                     tempvy = self.VX[Y] 
 
@@ -222,14 +222,14 @@ class CPU:
                     else :
                         self.VX[0xF] = 0
 
-                elif Nug4 == 0x6:   # shift right      #8XY6
+                elif Nug4 == 0x6:   # décalage droite     #8XY6
                     tempvx = self.VX[X]  
                     self.VX[X] = (tempvx >> 1) & 0xFF                    # et là on a le choix entre set vx à vy et shifté ou juste shifté vx. Selon la doc, la méthode moderne est de ne traité que vx (1990)
 
                     self.VX[0xF] = tempvx & 1             #ici on récupère le bit que l'on va perdre après être shifté vers la droite avec un bitwise and
                     
 
-                elif Nug4 == 0x7:    #sub               #8XY7
+                elif Nug4 == 0x7:    #soustraction               #8XY7
                     self.VX[X]  = (self.VX[Y] - self.VX[X]) % 256
 
                     if self.VX[Y] >= self.VX[X]:
@@ -261,6 +261,7 @@ class CPU:
 
 
             elif Nug1 == 0xc:                          # CXNN
+                # 
                 self.VX[X] = rand.randint(0, 255) & NN
                 self.PC += 2
                        
@@ -278,6 +279,7 @@ class CPU:
 
 
             elif Nug1 == 0xe and Nug3 == 0x9:          # EX9E
+            # Saut conditionnel sur les touches.
                 if  self.keypad[self.VX[X]] == 1:
                     self.PC+=4
                 else :
@@ -285,7 +287,7 @@ class CPU:
               
 
             elif Nug1 == 0xe and Nug3 == 0xa and Nug4 == 0x1:       # EXA1
-                
+            # Saut conditionnel sur les touches.                
                 if self.keypad[self.VX[X]] == 0:
                     self.PC+=4
                 else :
@@ -293,10 +295,12 @@ class CPU:
 
             elif Nug1 == 0xf: 
                 if Nug3 == 0x1 and Nug4 == 0xe:     # FX1E
+                    # Ajout à l'index.
                     self.Index = (self.VX[X] + self.Index) &  0x0FFF 
                     self.PC+=2
 
                 elif Nug3 == 0x2 and Nug4 == 0x9:   # FX29 
+                    
                     self.Index = self.VX[X] * 5
                     self.PC +=2
                 
@@ -318,9 +322,11 @@ class CPU:
                 elif Nug3 == 0x0 and Nug4 == 0x7:   # FX07
                     self.VX[X] = self.delay_timer
                     self.PC+=2
+
                 elif Nug3 == 0x1 and Nug4 == 0x5:   # FX1E
                     self.delay_timer = self.VX[X]
                     self.PC+=2
+                
                 elif Nug3 == 0x1 and Nug4 == 0x8:   # FX18
                     self.delay_sound = self.VX[X]
                     self.PC+=2
@@ -328,23 +334,25 @@ class CPU:
     #-------------- DATA STORAGE------------------------#
 
                 elif Nug3 == 0x5 and Nug4 == 5:     # FX55
-                   
+                # Stockage en mémoire.   
                     for i in range(X + 1):
                         self.memory[self.Index + i] = self.VX[i ] 
                     self.PC+=2
+                
+                
                 elif Nug3 == 0x6 and Nug4 == 0x5:             
-                    
+                # Chargement en mémoire.   
                     for i in range(X + 1):          
                         self.VX[i] = self.memory[self.Index + i]                    
                     self.PC+= 2 
               
-                elif Nug4 == 0xa :                  # FX0A
-                    key_is_pressed = False
-                    for i in range(16):
-                        if self.keypad[i]:
-                            self.VX[X] = i
-                            key_is_pressed = True
-                            break
-                    if not key_is_pressed:
+                elif Nug4 == 0xa :                  # FX0A, Obtention des touches.
+                    key_is_pressed = False          # Par défaut, les touches ne sont pas pressés.
+                    for i in range(16):             # À chaque boucle, on regarde si l'une de nos 16 touches sont pressées.
+                        if self.keypad[i]:          # Si la touches i est à 1 
+                            self.VX[X] = i          # On met le registre X à i
+                            key_is_pressed = True   # La touche est alors pressée
+                            break                   # On sort de la boucle 
+                    if not key_is_pressed:          # Sinon, on continue 
                         return
-                    self.PC+=2
+                    self.PC+=2                      # On passe à la prochaine instruction

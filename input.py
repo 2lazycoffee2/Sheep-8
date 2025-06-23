@@ -9,6 +9,7 @@ class Input :
         
         self.keypad = [0]*16            # Le pad du COSMAC VIP Utilise 16 touches. On le modélise par une matrice 1x16.
         self.key_map ={ 
+        #  Chaque touches du clavier correspond à une valeur hexadécimal envoyé au cpu.  
            ga.K_1 :   0x0,
            ga.K_2 :   0x1, 
            ga.K_3 :   0x2, 
@@ -37,12 +38,12 @@ class Input :
         Mise à jour des touches
         sont-elles pressées ou non.
         """
-        for event in events: 
+        for event in events:                                            # Si une touche est pressée, on met le coefficient  de la matrice keypad correspondant à la touche pressée 1. 
             if event.type == ga.KEYDOWN:
                 if event.key in self.key_map:
                     self.keypad[self.key_map[event.key]] = 1
             if event.type == ga.KEYUP:
-                    if event.key in self.key_map:
+                    if event.key in self.key_map:                       # Sinon, on laisse à 0.
                         self.keypad[self.key_map[event.key]] = 0
                     
 

@@ -38,7 +38,7 @@ class SettingsWindow(tb.Toplevel):
         self.set_toolbar_layout_callback = context.get('set_toolbar_layout_callback', None) #Callback pour la disposition de la toolbar
         self.save_toolbar_callback = context.get('save_toolbar_callback', None) #Callback pour afficher/masquer la toolbar
         self.title(self.translations[self.language]['settings']) #Titre de la fenêtre
-        self.geometry('800x800') #Taille de la fenêtre
+        self.geometry('850x850') #Taille de la fenêtre
         self.widgets = {} #Dictionnaire pour stocker les widgets
         self._style = self.master.style if hasattr(self.master, 'style') else tb.Style()
         self.toolbar_layout = context.get('toolbar_layout', 'left')
@@ -184,44 +184,54 @@ class SettingsWindow(tb.Toplevel):
         for widget in self.winfo_children():
             widget.destroy()
 
+        # Cadre Interface
+        lf_interface = tb.Labelframe(self, text=t.get('tab_interface', 'Interface'), bootstyle="info")
+        lf_interface.pack(fill='x', padx=20, pady=(20, 10), anchor='n')
 
         # Toolbar checkbox
         var_toolbar = tb.BooleanVar(value=self.toolbar_enabled)
         self.widgets['var_toolbar'] = var_toolbar
-        cb = tb.Checkbutton(self, text=t.get('show_toolbar', t['show_toolbar']), variable=var_toolbar, command=self._toggle_toolbar, bootstyle="success")
-        cb.pack(pady=10)
+        cb = tb.Checkbutton(lf_interface, text=t.get('show_toolbar', t['show_toolbar']), variable=var_toolbar, command=self._toggle_toolbar, bootstyle="success")
+        cb.pack(pady=10, anchor='w', padx=20)
         self.widgets['cb'] = cb
 
-        # Plein écran au lancement
-        var_fullscreen_on_start = tb.BooleanVar(value=self.fullscreen_on_start)
-        self.widgets['var_fullscreen_on_start'] = var_fullscreen_on_start
-        cb_fullscreen = tb.Checkbutton(self, text=t.get('fullscreen_on_start', 'Lancer les jeux en plein écran'), variable=var_fullscreen_on_start, command=self._toggle_fullscreen_on_start, bootstyle="info")
-        cb_fullscreen.pack(pady=5)
-        self.widgets['cb_fullscreen'] = cb_fullscreen
+        # Disposition de la toolbar
+        layout_values = ['left', 'top']
+        layout_labels = [t.get(f'toolbar_layout_{val}', val.capitalize()) for val in layout_values]
+        value_to_label = dict(zip(layout_values, layout_labels))
+        label_to_value = dict(zip(layout_labels, layout_values))
+        self.widgets['label_to_value'] = label_to_value
+        current_layout_value = getattr(self, 'toolbar_layout', 'left')
+        current_layout_label = value_to_label.get(current_layout_value, current_layout_value)
+        toolbar_layout_label = tb.Label(lf_interface, text=t['toolbar_layout'])
+        toolbar_layout_label.pack(padx=20, pady=(10,0), anchor='w')
+        self.widgets['toolbar_layout_label'] = toolbar_layout_label
+        layout_var = tb.StringVar(value=current_layout_label)
+        self.widgets['toolbar_layout_var'] = layout_var
+        layout_combo = tb.Combobox(lf_interface, textvariable=layout_var, values=layout_labels, state="readonly")
+        layout_combo.pack(padx=20, pady=10, anchor='w')
+        self.widgets['toolbar_layout_combo'] = layout_combo
+        layout_combo.bind('<<ComboboxSelected>>', self._on_layout_change)
 
-
-        # Slider + champ d'entrée pour la vitesse d'émulation
-        fr_label = tb.Label(self, text=t['framerate'])
-        fr_label.pack(pady=(5,0))
-        self.widgets['fr_label'] = fr_label
-        fr_value_label = tb.Label(self, text=f"{t['framerate_unlimited']}" if self.framerate < 0 else f"{self.framerate} Hz")
-        fr_value_label.pack()
-        self.widgets['fr_value_label'] = fr_value_label
-        framerate_frame = tb.Frame(self)
-        framerate_frame.pack(pady=5)
-        fr_slider = tb.Scale(framerate_frame, from_=-1, to=1000, orient='horizontal', length=220)
-        fr_slider.grid(row=0, column=0, padx=(0,8))
-        self.widgets['fr_slider'] = fr_slider
-        fr_entry_var = tb.StringVar(value=str(self.framerate))
-        self.widgets['fr_entry_var'] = fr_entry_var
-        fr_entry = tb.Entry(framerate_frame, textvariable=fr_entry_var, width=7)
-        fr_entry.grid(row=0, column=1)
-        self.widgets['fr_entry'] = fr_entry
-        fr_slider.config(command=self._on_slider_change)
-        fr_slider.set(self.framerate)
-        fr_slider.bind('<ButtonRelease-1>', self._on_slider_release)
-        fr_entry_var.trace_add('write', self._on_entry_validate)
-
+        # Sélecteur de thème ttkbootstrap
+        style = tb.Style()
+        available_themes = style.theme_names()
+        theme_label = tb.Label(lf_interface, text=t['theme'])
+        theme_label.pack(padx=20, pady=(10,0), anchor='w')
+        self.widgets['theme_label'] = theme_label
+        current_theme = getattr(self, 'theme', None)
+        if not current_theme:
+            current_theme = self.master.theme if hasattr(self.master, 'theme') else None
+        if not current_theme:
+            current_theme = self.translations.get('theme', available_themes[0])
+        if not current_theme or current_theme not in available_themes:
+            current_theme = available_themes[0]
+        theme_var = tb.StringVar(value=self.theme)
+        self.widgets['theme_var'] = theme_var
+        theme_combo = tb.Combobox(lf_interface, textvariable=theme_var, values=available_themes, state="readonly")
+        theme_combo.pack(padx=20, pady=10, anchor='w')
+        self.widgets['theme_combo'] = theme_combo
+        theme_combo.bind('<<ComboboxSelected>>', self._on_theme_change)
 
         # Sélecteur de langue
         lang_files = [f for f in os.listdir('lang') if f.endswith('.json')]
@@ -238,21 +248,52 @@ class SettingsWindow(tb.Toplevel):
         self.widgets['label_to_code'] = label_to_code
         labels = [code_to_label[code] for code in available_langs]
         current_label = code_to_label.get(self.language, self.language)
-        lang_label = tb.Label(self, text=t['language'])
-        lang_label.pack(pady=(5,0))
+        lang_label = tb.Label(lf_interface, text=t['language'])
+        lang_label.pack(padx=20, pady=(10,0), anchor='w')
         self.widgets['lang_label'] = lang_label
         lang_var = tb.StringVar(value=current_label)
         self.widgets['lang_var'] = lang_var
-        lang_combo = tb.Combobox(self, textvariable=lang_var, values=labels, state="readonly")
-        lang_combo.pack(pady=5)
+        lang_combo = tb.Combobox(lf_interface, textvariable=lang_var, values=labels, state="readonly")
+        lang_combo.pack(padx=20, pady=10, anchor='w')
         self.widgets['lang_combo'] = lang_combo
         lang_combo.bind('<<ComboboxSelected>>', self._on_language_change)
 
+        # Cadre Émulation
+        lf_emu = tb.Labelframe(self, text=t.get('tab_emulation', 'Émulation'), bootstyle="primary")
+        lf_emu.pack(fill='x', padx=20, pady=(10, 10), anchor='n')
+
+        # Plein écran au lancement
+        var_fullscreen_on_start = tb.BooleanVar(value=self.fullscreen_on_start)
+        self.widgets['var_fullscreen_on_start'] = var_fullscreen_on_start
+        cb_fullscreen = tb.Checkbutton(lf_emu, text=t.get('fullscreen_on_start', 'Lancer les jeux en plein écran'), variable=var_fullscreen_on_start, command=self._toggle_fullscreen_on_start, bootstyle="info")
+        cb_fullscreen.pack(padx=20, pady=10, anchor='w')
+        self.widgets['cb_fullscreen'] = cb_fullscreen
+
+        # Slider + champ d'entrée pour la vitesse d'émulation
+        fr_label = tb.Label(lf_emu, text=t['framerate'])
+        fr_label.pack(padx=20, pady=(10,0), anchor='w')
+        self.widgets['fr_label'] = fr_label
+        fr_value_label = tb.Label(lf_emu, text=f"{t['framerate_unlimited']}" if self.framerate < 0 else f"{self.framerate} Hz")
+        fr_value_label.pack(anchor='w', padx=20)
+        self.widgets['fr_value_label'] = fr_value_label
+        framerate_frame = tb.Frame(lf_emu)
+        framerate_frame.pack(padx=20, pady=10, anchor='w')
+        fr_slider = tb.Scale(framerate_frame, from_=-1, to=1000, orient='horizontal', length=220)
+        fr_slider.grid(row=0, column=0, padx=(0,8))
+        self.widgets['fr_slider'] = fr_slider
+        fr_entry_var = tb.StringVar(value=str(self.framerate))
+        self.widgets['fr_entry_var'] = fr_entry_var
+        fr_entry = tb.Entry(framerate_frame, textvariable=fr_entry_var, width=7)
+        fr_entry.grid(row=0, column=1)
+        self.widgets['fr_entry'] = fr_entry
+        fr_slider.config(command=self._on_slider_change)
+        fr_slider.set(self.framerate)
+        fr_slider.bind('<ButtonRelease-1>', self._on_slider_release)
+        fr_entry_var.trace_add('write', self._on_entry_validate)
 
         # Couleurs de fond et des sprites
-        color_frame = tb.Frame(self)
-        color_frame.pack(pady=(10,0))
-        t = self._get_translations(self.language)
+        color_frame = tb.Frame(lf_emu)
+        color_frame.pack(padx=20, pady=(10,0), anchor='w')
         bg_label = tb.Label(color_frame, text=t['bgcolor'])
         bg_label.grid(row=0, column=0, padx=5)
         bgcolor_canvas = tk.Canvas(color_frame, width=40, height=32, highlightthickness=1, highlightbackground="#888")
@@ -271,53 +312,14 @@ class SettingsWindow(tb.Toplevel):
         self.widgets['spritecolor_btn'] = spritecolor_canvas
         self.widgets['spritecolor_rect'] = spritecolor_rect
 
-
-        # Sélecteur de thème ttkbootstrap
-        style = tb.Style()
-        available_themes = style.theme_names()
-        theme_label = tb.Label(self, text=t['theme'])
-        theme_label.pack(pady=(5,0))
-        self.widgets['theme_label'] = theme_label
-        current_theme = getattr(self, 'theme', None)
-        if not current_theme:
-            current_theme = self.master.theme if hasattr(self.master, 'theme') else None
-        if not current_theme:
-            current_theme = self.translations.get('theme', available_themes[0])
-        if not current_theme or current_theme not in available_themes:
-            current_theme = available_themes[0]
-        theme_var = tb.StringVar(value=self.theme)
-        self.widgets['theme_var'] = theme_var
-        theme_combo = tb.Combobox(self, textvariable=theme_var, values=available_themes, state="readonly")
-        theme_combo.pack(pady=5)
-        self.widgets['theme_combo'] = theme_combo
-        theme_combo.bind('<<ComboboxSelected>>', self._on_theme_change)
-
-        # Disposition de la toolbar
-        layout_values = ['left', 'top']
-        layout_labels = [t[f'toolbar_layout_{val}'] for val in layout_values]
-        value_to_label = dict(zip(layout_values, layout_labels))
-        label_to_value = dict(zip(layout_labels, layout_values))
-        self.widgets['label_to_value'] = label_to_value
-        current_layout_value = getattr(self, 'toolbar_layout', 'left')
-        current_layout_label = value_to_label.get(current_layout_value, current_layout_value)
-        toolbar_layout_label = tb.Label(self, text=t['toolbar_layout'])
-        toolbar_layout_label.pack(pady=(5,0))
-        self.widgets['toolbar_layout_label'] = toolbar_layout_label
-        layout_var = tb.StringVar(value=current_layout_label)
-        self.widgets['toolbar_layout_var'] = layout_var
-        layout_combo = tb.Combobox(self, textvariable=layout_var, values=layout_labels, state="readonly")
-        layout_combo.pack(pady=5)
-        self.widgets['toolbar_layout_combo'] = layout_combo
-        layout_combo.bind('<<ComboboxSelected>>', self._on_layout_change)
-
-        # Bouton Restaurer les valeurs par défaut
-        restore_btn = tb.Button(self, text=t.get('restore_defaults', 'Restaurer les valeurs par défaut'), bootstyle="warning", command=self._restore_defaults)
-        restore_btn.pack(pady=8)
+        # Boutons en bas
+        btn_frame = tb.Frame(self)
+        btn_frame.pack(fill='x', pady=(0,10))
+        restore_btn = tb.Button(btn_frame, text=t.get('restore_defaults', 'Restaurer les valeurs par défaut'), bootstyle="warning", command=self._restore_defaults)
+        restore_btn.pack(side='left', padx=10)
         self.widgets['restore_btn'] = restore_btn
-
-        # Bouton OK
-        ok_btn = tb.Button(self, text=t.get('ok', 'OK'), bootstyle="success", command=self.destroy)
-        ok_btn.pack(pady=10)
+        ok_btn = tb.Button(btn_frame, text=t.get('ok', 'OK'), bootstyle="success", command=self.destroy)
+        ok_btn.pack(side='right', padx=10)
         self.widgets['ok_btn'] = ok_btn
 
 

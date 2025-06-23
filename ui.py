@@ -98,15 +98,16 @@ class UI:
         """
         Mise à jour de la présence Discord
         """
+        t = self.translations[self.language]
         if not self.discord_connected or not self.rpc:
             return
         try:
             if self.is_running:
-                state = "En cours d'émulation" if state is None else state
-                details = f"Joue à {os.path.basename(self.rom_path)}" if self.rom_path else "Aucune ROM chargée"
+                state = t['discord_state_playing'] if state is None else state
+                details = t.get('discord_details_playing', "{rom}").format(rom=os.path.basename(self.rom_path)) if self.rom_path else t['discord_details_none']
             else:
-                state = "En attente" if state is None else state
-                details = "Aucune ROM chargée"
+                state = t['discord_state_idle'] if state is None else state
+                details = t['discord_details_none']
             self.rpc.update(
                 state=state,
                 details=details,
@@ -261,10 +262,10 @@ class UI:
         if self.rom_listbox is not None:
             self.rom_listbox.destroy()
         self.rom_listbox = tb.Treeview(self.root, columns=columns, show='headings', bootstyle="info")
-        self.rom_listbox.heading('name', text=t.get('name', 'Nom'))
+        self.rom_listbox.heading('name', text=t.get('name', 'Name'))
         # Ajout de l'unité à la taille
-        size_unit = t.get('size_unit', 'o')
-        self.rom_listbox.heading('size', text=f"{t.get('size', 'Taille')} ({size_unit})")
+        size_unit = t.get('size_unit', 'B')
+        self.rom_listbox.heading('size', text=f"{t.get('size', 'Size')} ({size_unit})")
         self.rom_listbox.column('name', width=300, anchor='w')
         self.rom_listbox.column('size', width=100, anchor='w')
         self.rom_listbox.pack(fill=tb.BOTH, expand=True) #Ajustement de la taille de la liste à la fenêtre
@@ -483,14 +484,73 @@ class UI:
         Affichage de l'aide
         """
         t = self.translations[self.language]
-        messagebox.showinfo(t['help'], t['help_msg'])
+        help_text = (
+            f"{t['help_msg']}\n\n"
+            f"{t['help_keys_assignation']}\n"
+            f"{t['help_chip8keys']}\n"
+            f"{t['help_chip8tokeyboard']}\n\n"
+            f"{t['help_keyboard_shortcuts']}\n"
+            f"{t['help_key_F5']}\n"
+            f"{t['help_key_F6']}\n"
+            f"{t['help_key_F11']}\n\n"
+            f"{t['help_morekeys']}"
+        )
+        help_win = tk.Toplevel(self.root)
+        help_win.title(t.get('help', 'Help'))
+        help_win.resizable(False, False) #Redimensionnement interdit en largeur et en hauteur
+        help_win.transient(self.root) #Fenêtre secondaire
+        help_win.grab_set() #Empêche l'interaction avec la fenêtre principale tant que le popup d'aide est ouvert
+        label = tk.Label(help_win, text=help_text, justify="left", font=("", 11)) #Texte d'aide
+        label.pack(padx=20, pady=20) 
+        keypad_img = Image.open("assets/uielements/keypad-keyboard.png")
+        #keypad_img = keypad_img.resize((440, 240), Image.LANCZOS)
+        keypad = ImageTk.PhotoImage(keypad_img)
+        keypad_label = tb.Label(help_win, image=keypad)
+        keypad_label.image = keypad
+        keypad_label.pack(pady=(0, 10))
+        close_btn = tb.Button(help_win, text=t.get('close', 'Close'), command=help_win.destroy, bootstyle="secondary")
+        close_btn.pack(pady=(0,10))
 
     def show_about(self):
         """
         Affichage des informations sur l'émulateur
         """
         t = self.translations[self.language]
-        messagebox.showinfo(t['about'], t['about_msg'])
+        versionnumber = "v1.1.2"
+        about = tk.Toplevel(self.root)
+        about.title(t.get('about', 'About'))
+        about.resizable(False, False)
+        about.transient(self.root)
+        about.grab_set()
+        frame = tb.Frame(about) #Frame pour icone, titre et description
+        frame.pack(padx=20, pady=20)
+
+        # Icône SHEEP 8
+        try:
+            icon_img = Image.open("assets/icon/sheep-256.png")
+            #icon_img = icon_img.resize((96, 96), Image.LANCZOS)
+            icon = ImageTk.PhotoImage(icon_img)
+            icon_label = tk.Label(frame, image=icon)
+            icon_label.image = icon
+            icon_label.grid(row=0, column=0, rowspan=3, sticky="w")
+        except Exception:
+            pass
+
+        # Titre et version à droite
+        title_frame = tb.Frame(frame)
+        title_frame.grid(row=0, column=1, sticky="w", padx=(20,0))
+        title = tk.Label(title_frame, text=t.get('about_title', 'Sheep 8'), font=("", 22, "bold"))
+        title.pack(side="left")
+        version = tk.Label(title_frame, text=versionnumber, font=("", 16, "bold"), fg="#888")
+        version.pack(side="left", padx=(10,0))
+
+        # Paragraphe
+        desc = t['about_desc']
+        desc_label = tk.Label(frame, text=desc, justify="left", font=("", 11))
+        desc_label.grid(row=1, column=1, sticky="w", padx=(20,0), pady=(10,0))
+        # Bouton fermer
+        close_btn = tb.Button(frame, text=t.get('close', 'Close'), command=about.destroy, bootstyle="secondary")
+        close_btn.grid(row=2, column=1, sticky="e", padx=(20,0), pady=(20,0))
 
     def _monitor_factory(self):
         """
@@ -523,10 +583,11 @@ class UI:
         """
         Demande à l'émulateur de basculer en mode plein écran
         """
+        t = self.translations[self.language]
         if hasattr(self, '_fullscreen_toggle_requested') and self._fullscreen_toggle_requested is not None:
             self._fullscreen_toggle_requested.set()
         else:
-            messagebox.showinfo("Info", "L'émulation doit être lancée pour activer le plein écran.")
+            messagebox.showinfo("Info", t['fullscreen_info'])
 
     def save_config(self):
         """

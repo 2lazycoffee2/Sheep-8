@@ -9,9 +9,11 @@ class Input :
         
         self.keypad = [0]*16            # Le pad du COSMAC VIP Utilise 16 touches. On le modélise par une matrice 1x16.
         self.key_map ={ 
+
         #  Chaque touches du clavier correspond à une valeur hexadécimal envoyé au cpu.  
            ga.K_1 :   0x1,
            ga.K_2 :   0x2,
+           233    :   0x2, #Caractère é en AZERTY
            ga.K_3 :   0x3, 
            ga.K_4 :   0xc,
 

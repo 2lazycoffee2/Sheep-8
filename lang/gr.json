@@ -50,5 +50,10 @@
     "help_key_F11": "F11: Λειτουργία πλήρους οθόνης",
     "help_morekeys": "Για περισσότερες λεπτομέρειες, δείτε την τεκμηρίωση στο GitHub.",
     "about_title": "Sheep 8",
-    "about_desc": "Εξομοιωτής CHIP-8 από τους 2LazyCoffee2 και TortipOOF\nστο πλαίσιο έργου στο Polytech Dijon\n\nΚυκλοφορίες: https://github.com/2LazyCoffee2/Python_Project/releases\nΤεκμηρίωση: https://github.com/2LazyCoffee2/Python_Project/wiki\nΑυτό το λογισμικό είναι ανοιχτού κώδικα. Για ερωτήσεις επικοινωνήστε μαζί μας."
+    "about_desc": "Εξομοιωτής CHIP-8 από τους 2LazyCoffee2 και TortipOOF\nστο πλαίσιο έργου στο Polytech Dijon\n\nΚυκλοφορίες: https://github.com/2LazyCoffee2/Python_Project/releases\nΤεκμηρίωση: https://github.com/2LazyCoffee2/Python_Project/wiki\nΑυτό το λογισμικό είναι ανοιχτού κώδικα. Για ερωτήσεις επικοινωνήστε μαζί μας.",
+    "discord_state_playing": "Σε εξέλιξη εξομοίωση",
+    "discord_state_idle": "Αναμονή",
+    "discord_details_playing": "Παίζει {rom}",
+    "discord_details_none": "Δεν φορτώθηκε ROM",
+    "fullscreen_info": "Η εξομοίωση πρέπει να εκτελείται για να ενεργοποιηθεί η πλήρης οθόνη."
 }

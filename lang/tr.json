@@ -50,5 +50,10 @@
     "help_key_F11": "F11: Tam ekran modu",
     "help_morekeys": "Daha fazla detay için GitHub dokümantasyonuna bakın.",
     "about_title": "Sheep 8",
-    "about_desc": "CHIP-8 emülatörü 2LazyCoffee2 ve TortipOOF tarafından\nPolytech Dijon projesi kapsamında geliştirilmiştir.\n\nSürümler: https://github.com/2LazyCoffee2/Python_Project/releases\nDokümantasyon: https://github.com/2LazyCoffee2/Python_Project/wiki\nBu yazılım açık kaynaklıdır. Sorularınız için bize ulaşın."
+    "about_desc": "CHIP-8 emülatörü 2LazyCoffee2 ve TortipOOF tarafından\nPolytech Dijon projesi kapsamında geliştirilmiştir.\n\nSürümler: https://github.com/2LazyCoffee2/Python_Project/releases\nDokümantasyon: https://github.com/2LazyCoffee2/Python_Project/wiki\nBu yazılım açık kaynaklıdır. Sorularınız için bize ulaşın.",
+    "discord_state_playing": "Emülasyon çalışıyor",
+    "discord_state_idle": "Beklemede",
+    "discord_details_playing": "{rom} oynanıyor",
+    "discord_details_none": "Yüklü ROM yok",
+    "fullscreen_info": "Tam ekranı etkinleştirmek için emülasyon başlatılmalıdır."
 }

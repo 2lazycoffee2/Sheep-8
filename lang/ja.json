@@ -50,5 +50,10 @@
     "help_key_F11": "F11：フルスクリーンモード",
     "help_morekeys": "詳細はGitHubのドキュメントをご覧ください。",
     "about_title": "Sheep 8",
-    "about_desc": "Sheep 8は2LazyCoffee2とTortipOOFが\nポリテック・ディジョンの学業プロジェクトの一環として開発したCHIP-8エミュレータです。\n\nリリース: https://github.com/2LazyCoffee2/Python_Project/releases\nドキュメント: https://github.com/2LazyCoffee2/Python_Project/wiki\nこのソフトウェアはオープンソースです。ご質問があればご連絡ください。"
+    "about_desc": "Sheep 8は2LazyCoffee2とTortipOOFが\nポリテック・ディジョンの学業プロジェクトの一環として開発したCHIP-8エミュレータです。\n\nリリース: https://github.com/2LazyCoffee2/Python_Project/releases\nドキュメント: https://github.com/2LazyCoffee2/Python_Project/wiki\nこのソフトウェアはオープンソースです。ご質問があればご連絡ください。",
+    "discord_state_playing": "エミュレーション中",
+    "discord_details_none": "ROMがロードされていません",
+    "discord_state_idle": "待機中",
+    "discord_details_playing": "{rom}をプレイ中",
+    "fullscreen_info": "フルスクリーンを有効にするにはエミュレーションを開始してください。"
 }

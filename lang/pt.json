@@ -50,5 +50,10 @@
     "help_key_F11": "F11: Modo tela cheia",
     "help_morekeys": "Para mais detalhes, consulte a documentação no GitHub.",
     "about_title": "Sheep 8",
-    "about_desc": "Emulador CHIP-8 desenvolvido por 2LazyCoffee2 e TortipOOF\ncomo parte de um projeto na Polytech Dijon.\n\nLançamentos: https://github.com/2LazyCoffee2/Python_Project/releases\nDocumentação: https://github.com/2LazyCoffee2/Python_Project/wiki\nEste software é open-source. Para dúvidas, entre em contato."
+    "about_desc": "Emulador CHIP-8 desenvolvido por 2LazyCoffee2 e TortipOOF\ncomo parte de um projeto na Polytech Dijon.\n\nLançamentos: https://github.com/2LazyCoffee2/Python_Project/releases\nDocumentação: https://github.com/2LazyCoffee2/Python_Project/wiki\nEste software é open-source. Para dúvidas, entre em contato.",
+    "discord_state_playing": "Emulação em andamento",
+    "discord_state_idle": "Aguardando",
+    "discord_details_playing": "Jogando {rom}",
+    "discord_details_none": "Nenhuma ROM carregada",
+    "fullscreen_info": "A emulação deve estar em execução para ativar a tela cheia."
 }

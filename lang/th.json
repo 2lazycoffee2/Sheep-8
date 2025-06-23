@@ -50,5 +50,10 @@
     "help_key_F11": "F11: โหมดเต็มหน้าจอ",
     "help_morekeys": "ดูรายละเอียดเพิ่มเติมได้ที่เอกสารบน GitHub",
     "about_title": "Sheep 8",
-    "about_desc": "โปรแกรมจำลอง CHIP-8 พัฒนาโดย 2LazyCoffee2 และ TortipOOF\nในโครงการที่ Polytech Dijon\n\nรุ่น: https://github.com/2LazyCoffee2/Python_Project/releases\nเอกสาร: https://github.com/2LazyCoffee2/Python_Project/wiki\nซอฟต์แวร์นี้เป็นโอเพ่นซอร์ส หากมีคำถามเพิ่มเติม กรุณาติดต่อเรา"
+    "about_desc": "โปรแกรมจำลอง CHIP-8 พัฒนาโดย 2LazyCoffee2 และ TortipOOF\nในโครงการที่ Polytech Dijon\n\nรุ่น: https://github.com/2LazyCoffee2/Python_Project/releases\nเอกสาร: https://github.com/2LazyCoffee2/Python_Project/wiki\nซอฟต์แวร์นี้เป็นโอเพ่นซอร์ส หากมีคำถามเพิ่มเติม กรุณาติดต่อเรา",
+    "discord_state_playing": "กำลังจำลอง",
+    "discord_state_idle": "รออยู่",
+    "discord_details_playing": "กำลังเล่น {rom}",
+    "discord_details_none": "ยังไม่ได้โหลด ROM",
+    "fullscreen_info": "ต้องเริ่มการจำลองก่อนจึงจะเปิดโหมดเต็มหน้าจอได้"
 }

@@ -50,5 +50,10 @@
     "help_key_F11": "F11: Teljes képernyő mód",
     "help_morekeys": "További részletekért lásd a GitHub dokumentációt.",
     "about_title": "Sheep 8",
-    "about_desc": "A CHIP-8 emulátort 2LazyCoffee2 és TortipOOF fejlesztette\na Polytech Dijon projekt keretében\n\nKiadások: https://github.com/2LazyCoffee2/Python_Project/releases\nDokumentáció: https://github.com/2LazyCoffee2/Python_Project/wiki\nEz a szoftver nyílt forráskódú. További kérdések esetén vegye fel velünk a kapcsolatot."
+    "about_desc": "A CHIP-8 emulátort 2LazyCoffee2 és TortipOOF fejlesztette\na Polytech Dijon projekt keretében\n\nKiadások: https://github.com/2LazyCoffee2/Python_Project/releases\nDokumentáció: https://github.com/2LazyCoffee2/Python_Project/wiki\nEz a szoftver nyílt forráskódú. További kérdések esetén vegye fel velünk a kapcsolatot.",
+    "discord_state_playing": "Emuláció folyamatban",
+    "discord_state_idle": "Várakozás",
+    "discord_details_playing": "{rom} játszása",
+    "discord_details_none": "Nincs betöltött ROM",
+    "fullscreen_info": "A teljes képernyő engedélyezéséhez az emulációnak futnia kell."
 }

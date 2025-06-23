@@ -50,5 +50,10 @@
     "help_key_F11": "F11: Mod ecran complet",
     "help_morekeys": "Pentru mai multe detalii, vezi documentația pe GitHub.",
     "about_title": "Sheep 8",
-    "about_desc": "Emulator CHIP-8 dezvoltat de 2LazyCoffee2 și TortipOOF\nca parte a unui proiect la Polytech Dijon\n\nLansări: https://github.com/2LazyCoffee2/Python_Project/releases\nDocumentație: https://github.com/2LazyCoffee2/Python_Project/wiki\nAcest software este open-source. Pentru întrebări suplimentare, contactați-ne."
+    "about_desc": "Emulator CHIP-8 dezvoltat de 2LazyCoffee2 și TortipOOF\nca parte a unui proiect la Polytech Dijon\n\nLansări: https://github.com/2LazyCoffee2/Python_Project/releases\nDocumentație: https://github.com/2LazyCoffee2/Python_Project/wiki\nAcest software este open-source. Pentru întrebări suplimentare, contactați-ne.",
+    "discord_state_playing": "Emulare în curs",
+    "discord_state_idle": "În așteptare",
+    "discord_details_playing": "Joacă {rom}",
+    "discord_details_none": "Nicio ROM încărcată",
+    "fullscreen_info": "Emularea trebuie să fie pornită pentru a activa modul ecran complet."
 }

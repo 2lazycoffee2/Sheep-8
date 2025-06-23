@@ -50,5 +50,10 @@
     "help_key_F11": "F11: Vollbildmodus",
     "help_morekeys": "Weitere Details finden Sie in der GitHub-Dokumentation.",
     "about_title": "Sheep 8",
-    "about_desc": "CHIP-8 Emulator entwickelt von 2LazyCoffee2 und TortipOOF\nim Rahmen eines Projekts an der Polytech Dijon.\n\nReleases: https://github.com/2LazyCoffee2/Python_Project/releases\nDokumentation: https://github.com/2LazyCoffee2/Python_Project/wiki\nDiese Software ist Open Source. Bei Fragen kontaktieren Sie uns bitte."
+    "about_desc": "CHIP-8 Emulator entwickelt von 2LazyCoffee2 und TortipOOF\nim Rahmen eines Projekts an der Polytech Dijon.\n\nReleases: https://github.com/2LazyCoffee2/Python_Project/releases\nDokumentation: https://github.com/2LazyCoffee2/Python_Project/wiki\nDiese Software ist Open Source. Bei Fragen kontaktieren Sie uns bitte.",
+    "discord_state_playing": "Emulation läuft",
+    "discord_details_none": "Keine ROM geladen",
+    "discord_state_idle": "Wartend",
+    "discord_details_playing": "Spielt {rom}",
+    "fullscreen_info": "Die Emulation muss laufen, um den Vollbildmodus zu aktivieren."
 }

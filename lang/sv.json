@@ -50,5 +50,10 @@
     "help_key_F11": "F11: Helskärmsläge",
     "help_morekeys": "Se mer i dokumentationen på GitHub.",
     "about_title": "Sheep 8",
-    "about_desc": "CHIP-8 emulator utvecklad av 2LazyCoffee2 och TortipOOF\nsom en del av ett projekt på Polytech Dijon.\n\nUtgåvor: https://github.com/2LazyCoffee2/Python_Project/releases\nDokumentation: https://github.com/2LazyCoffee2/Python_Project/wiki\nDenna programvara är open-source. Kontakta oss vid frågor."
+    "about_desc": "CHIP-8 emulator utvecklad av 2LazyCoffee2 och TortipOOF\nsom en del av ett projekt på Polytech Dijon.\n\nUtgåvor: https://github.com/2LazyCoffee2/Python_Project/releases\nDokumentation: https://github.com/2LazyCoffee2/Python_Project/wiki\nDenna programvara är open-source. Kontakta oss vid frågor.",
+    "discord_state_playing": "Emulering pågår",
+    "discord_state_idle": "Väntar",
+    "discord_details_playing": "Spelar {rom}",
+    "discord_details_none": "Ingen ROM laddad",
+    "fullscreen_info": "Emuleringen måste vara igång för att aktivera helskärm."
 }

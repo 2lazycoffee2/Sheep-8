@@ -98,15 +98,16 @@ class UI:
         """
         Mise à jour de la présence Discord
         """
+        t = self.translations[self.language]
         if not self.discord_connected or not self.rpc:
             return
         try:
             if self.is_running:
-                state = "En cours d'émulation" if state is None else state
-                details = f"Joue à {os.path.basename(self.rom_path)}" if self.rom_path else "Aucune ROM chargée"
+                state = t['discord_state_playing'] if state is None else state
+                details = t.get('discord_details_playing', "{rom}").format(rom=os.path.basename(self.rom_path)) if self.rom_path else t['discord_details_none']
             else:
-                state = "En attente" if state is None else state
-                details = "Aucune ROM chargée"
+                state = t['discord_state_idle'] if state is None else state
+                details = t['discord_details_none']
             self.rpc.update(
                 state=state,
                 details=details,
@@ -582,10 +583,11 @@ class UI:
         """
         Demande à l'émulateur de basculer en mode plein écran
         """
+        t = self.translations[self.language]
         if hasattr(self, '_fullscreen_toggle_requested') and self._fullscreen_toggle_requested is not None:
             self._fullscreen_toggle_requested.set()
         else:
-            messagebox.showinfo("Info", "L'émulation doit être lancée pour activer le plein écran.")
+            messagebox.showinfo("Info", t['fullscreen_info'])
 
     def save_config(self):
         """

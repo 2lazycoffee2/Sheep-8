@@ -50,5 +50,10 @@
     "help_key_F11": "F11：全屏模式",
     "help_morekeys": "更多详情请参见GitHub文档。",
     "about_title": "Sheep 8",
-    "about_desc": "Sheep 8是由2LazyCoffee2和TortipOOF\n在第戎理工学院项目中开发的CHIP-8模拟器。\n\n发布页：https://github.com/2LazyCoffee2/Python_Project/releases\n文档：https://github.com/2LazyCoffee2/Python_Project/wiki\n本软件为开源。如有疑问请联系我们。"
+    "about_desc": "Sheep 8是由2LazyCoffee2和TortipOOF\n在第戎理工学院项目中开发的CHIP-8模拟器。\n\n发布页：https://github.com/2LazyCoffee2/Python_Project/releases\n文档：https://github.com/2LazyCoffee2/Python_Project/wiki\n本软件为开源。如有疑问请联系我们。",
+    "discord_state_playing": "正在模拟",
+    "discord_state_idle": "等待中",
+    "discord_details_playing": "正在玩 {rom}",
+    "discord_details_none": "未加载ROM",
+    "fullscreen_info": "必须先启动模拟才能启用全屏。"
 }

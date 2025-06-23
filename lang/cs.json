@@ -50,5 +50,10 @@
     "help_key_F11": "F11: Režim celé obrazovky",
     "help_morekeys": "Více informací v dokumentaci na GitHub.",
     "about_title": "Sheep 8",
-    "about_desc": "Emulátor CHIP-8 vyvinutý 2LazyCoffee2 a TortipOOF\nv rámci projektu na Polytech Dijon.\n\nVydání: https://github.com/2LazyCoffee2/Python_Project/releases\nDokumentace: https://github.com/2LazyCoffee2/Python_Project/wiki\nTento software je open-source. V případě dotazů nás kontaktujte."
+    "about_desc": "Emulátor CHIP-8 vyvinutý 2LazyCoffee2 a TortipOOF\nv rámci projektu na Polytech Dijon.\n\nVydání: https://github.com/2LazyCoffee2/Python_Project/releases\nDokumentace: https://github.com/2LazyCoffee2/Python_Project/wiki\nTento software je open-source. V případě dotazů nás kontaktujte.",
+    "discord_state_playing": "Probíhá emulace",
+    "discord_state_idle": "Čekání",
+    "discord_details_playing": "Hraje {rom}",
+    "discord_details_none": "Žádná ROM nenahrána",
+    "fullscreen_info": "Pro aktivaci režimu celé obrazovky musí být emulace spuštěna."
 }

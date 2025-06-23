@@ -50,5 +50,10 @@
     "help_key_F11": "F11: Повноекранний режим",
     "help_morekeys": "Детальніше дивіться у документації на GitHub.",
     "about_title": "Sheep 8",
-    "about_desc": "Емулятор CHIP-8, розроблений 2LazyCoffee2 та TortipOOF\nу рамках проекту в Polytech Dijon\n\nРелізи: https://github.com/2LazyCoffee2/Python_Project/releases\nДокументація: https://github.com/2LazyCoffee2/Python_Project/wiki\nЦе програмне забезпечення з відкритим кодом. З питаннями звертайтеся до нас."
+    "about_desc": "Емулятор CHIP-8, розроблений 2LazyCoffee2 та TortipOOF\nу рамках проекту в Polytech Dijon\n\nРелізи: https://github.com/2LazyCoffee2/Python_Project/releases\nДокументація: https://github.com/2LazyCoffee2/Python_Project/wiki\nЦе програмне забезпечення з відкритим кодом. З питаннями звертайтеся до нас.",
+    "discord_state_playing": "Емуляція триває",
+    "discord_state_idle": "Очікування",
+    "discord_details_playing": "Грає в {rom}",
+    "discord_details_none": "ROM не завантажено",
+    "fullscreen_info": "Щоб увімкнути повноекранний режим, емулювання має бути запущено."
 }

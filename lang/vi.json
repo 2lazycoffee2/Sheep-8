@@ -50,5 +50,10 @@
     "help_key_F11": "F11: Chế độ toàn màn hình",
     "help_morekeys": "Xem thêm tài liệu trên GitHub.",
     "about_title": "Sheep 8",
-    "about_desc": "Trình giả lập CHIP-8 do 2LazyCoffee2 và TortipOOF phát triển\ntrong dự án tại Polytech Dijon.\n\nPhát hành: https://github.com/2LazyCoffee2/Python_Project/releases\nTài liệu: https://github.com/2LazyCoffee2/Python_Project/wiki\nPhần mềm này là mã nguồn mở. Mọi thắc mắc xin liên hệ."
+    "about_desc": "Trình giả lập CHIP-8 do 2LazyCoffee2 và TortipOOF phát triển\ntrong dự án tại Polytech Dijon.\n\nPhát hành: https://github.com/2LazyCoffee2/Python_Project/releases\nTài liệu: https://github.com/2LazyCoffee2/Python_Project/wiki\nPhần mềm này là mã nguồn mở. Mọi thắc mắc xin liên hệ.",
+    "discord_state_playing": "Đang mô phỏng",
+    "discord_state_idle": "Đang chờ",
+    "discord_details_playing": "Đang chơi {rom}",
+    "discord_details_none": "Chưa tải ROM",
+    "fullscreen_info": "Phải chạy mô phỏng để bật chế độ toàn màn hình."
 }

@@ -50,5 +50,10 @@
     "help_key_F11": "F11: फुलस्क्रीन मोड",
     "help_morekeys": "अधिक जानकारी के लिए GitHub डॉक्स देखें।",
     "about_title": "Sheep 8",
-    "about_desc": "Sheep 8, 2LazyCoffee2 और TortipOOF द्वारा\nPolytech Dijon प्रोजेक्ट के तहत विकसित CHIP-8 एमुलेटर है।\n\nरिलीज़: https://github.com/2LazyCoffee2/Python_Project/releases\nडॉक्यूमेंटेशन: https://github.com/2LazyCoffee2/Python_Project/wiki\nयह सॉफ़्टवेयर ओपन-सोर्स है। सवालों के लिए संपर्क करें।"
+    "about_desc": "Sheep 8, 2LazyCoffee2 और TortipOOF द्वारा\nPolytech Dijon प्रोजेक्ट के तहत विकसित CHIP-8 एमुलेटर है।\n\nरिलीज़: https://github.com/2LazyCoffee2/Python_Project/releases\nडॉक्यूमेंटेशन: https://github.com/2LazyCoffee2/Python_Project/wiki\nयह सॉफ़्टवेयर ओपन-सोर्स है। सवालों के लिए संपर्क करें।",
+    "discord_state_playing": "एमुलेशन चालू है",
+    "discord_state_idle": "प्रतीक्षा में",
+    "discord_details_playing": "{rom} खेल रहा है",
+    "discord_details_none": "कोई ROM लोड नहीं है",
+    "fullscreen_info": "पूर्ण स्क्रीन सक्षम करने के लिए एमुलेशन चालू होना चाहिए।"
 }

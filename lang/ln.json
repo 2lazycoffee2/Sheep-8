@@ -50,5 +50,10 @@
     "help_key_F11": "F11: Mode ekran mobimba",
     "help_morekeys": "Po na koyeba mingi, tala documentation na GitHub.",
     "about_title": "Sheep 8",
-    "about_desc": "Emulateur CHIP-8 esalemi na 2LazyCoffee2 na TortipOOF\nna projet ya Polytech Dijon.\n\nReleases: https://github.com/2LazyCoffee2/Python_Project/releases\nDocumentation: https://github.com/2LazyCoffee2/Python_Project/wiki\nLogiciel oyo ezali open-source. Soki olingi koyeba mingi, kotuna biso."
+    "about_desc": "Emulateur CHIP-8 esalemi na 2LazyCoffee2 na TortipOOF\nna projet ya Polytech Dijon.\n\nReleases: https://github.com/2LazyCoffee2/Python_Project/releases\nDocumentation: https://github.com/2LazyCoffee2/Python_Project/wiki\nLogiciel oyo ezali open-source. Soki olingi koyeba mingi, kotuna biso.",
+    "discord_state_playing": "Emulation en cours",
+    "discord_state_idle": "Kozela",
+    "discord_details_playing": "Kozala na {rom}",
+    "discord_details_none": "ROM moko te ezwi",
+    "fullscreen_info": "Emulation esengeli ebandi mpo fullscreen esala."
 }

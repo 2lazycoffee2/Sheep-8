@@ -50,5 +50,10 @@
     "help_key_F11": "F11: Koko näytön tila",
     "help_morekeys": "Lisätietoja GitHub-dokumentaatiossa.",
     "about_title": "Sheep 8",
-    "about_desc": "CHIP-8-emulaattori, jonka ovat kehittäneet 2LazyCoffee2 ja TortipOOF\nPolytech Dijon -projektissa.\n\nJulkaisut: https://github.com/2LazyCoffee2/Python_Project/releases\nDokumentaatio: https://github.com/2LazyCoffee2/Python_Project/wiki\nTämä ohjelmisto on avoimen lähdekoodin. Kysy lisää tarvittaessa."
+    "about_desc": "CHIP-8-emulaattori, jonka ovat kehittäneet 2LazyCoffee2 ja TortipOOF\nPolytech Dijon -projektissa.\n\nJulkaisut: https://github.com/2LazyCoffee2/Python_Project/releases\nDokumentaatio: https://github.com/2LazyCoffee2/Python_Project/wiki\nTämä ohjelmisto on avoimen lähdekoodin. Kysy lisää tarvittaessa.",
+    "discord_state_playing": "Emulointi käynnissä",
+    "discord_state_idle": "Odottaa",
+    "discord_details_playing": "Pelaa {rom}",
+    "discord_details_none": "Ei ladattua ROMia",
+    "fullscreen_info": "Emuloinnin on oltava käynnissä, jotta koko näyttö voidaan ottaa käyttöön."
 }

@@ -50,5 +50,10 @@
     "help_key_F11": "F11: Tryb pełnoekranowy",
     "help_morekeys": "Więcej szczegółów w dokumentacji na GitHub.",
     "about_title": "Sheep 8",
-    "about_desc": "Emulator CHIP-8 opracowany przez 2LazyCoffee2 i TortipOOF\nw ramach projektu na Polytech Dijon.\n\nWydania: https://github.com/2LazyCoffee2/Python_Project/releases\nDokumentacja: https://github.com/2LazyCoffee2/Python_Project/wiki\nTo oprogramowanie jest open-source. W razie pytań, skontaktuj się z nami."
+    "about_desc": "Emulator CHIP-8 opracowany przez 2LazyCoffee2 i TortipOOF\nw ramach projektu na Polytech Dijon.\n\nWydania: https://github.com/2LazyCoffee2/Python_Project/releases\nDokumentacja: https://github.com/2LazyCoffee2/Python_Project/wiki\nTo oprogramowanie jest open-source. W razie pytań, skontaktuj się z nami.",
+    "discord_state_playing": "Trwa emulacja",
+    "discord_state_idle": "Oczekiwanie",
+    "discord_details_playing": "Gra w {rom}",
+    "discord_details_none": "Brak załadowanego ROMu",
+    "fullscreen_info": "Aby włączyć tryb pełnoekranowy, emulacja musi być uruchomiona."
 }

@@ -36,5 +36,9 @@
     "fullscreen_on_start": "フルスクリーンでゲームを起動",
     "bgcolor": "背景色",
     "spritecolor": "スプライト色",
-    "restore_defaults": "デフォルトに戻す"
+    "restore_defaults": "デフォルトに戻す",
+    "theme": "テーマ",
+    "toolbar_layout": "ツールバーのレイアウト",
+    "toolbar_layout_left": "左に小さなアイコン",
+    "toolbar_layout_top": "上に中くらいのアイコン"
 }

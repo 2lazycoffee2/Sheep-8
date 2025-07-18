@@ -2,10 +2,8 @@
 
 
 ## Introduction :
-Dans le cadre de nos études, Victor ainsi que moi même sommes ammenés à construire tout un projet de programmation en python.  
-Nos prénoms : 
-- TortipOOF -> Victor
-- 2lazycoffee2 -> Hicham
+Dans le cadre de nos études,mon collègue ainsi que moi même sommes ammenés à construire tout un projet de programmation en python.  
+N
 
 Le projet vient d'une passion et d'une nostalgie profonde pour les jeux rétros. Le projet est assez ambitieux mais les défis ne nous font pas peur.  
 Nous proposons un émulateur que nous avons baptisé "Sheep 8", reproduisant le comportement du Chip-8 qui fut développé initialement dans le cadre du développement de jeux sur l'ordinateur COSMAC VIP en 1977. Nous proposons dans ce projet la reproduction du comportement du processeur RCA 1802. 
